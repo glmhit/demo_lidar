@@ -36,9 +36,10 @@ const double epsilon = 0.0001;
 using namespace std;
 using namespace Eigen;
 
-namespace isam {
-
-MatrixXd numericalDiff(Function& func) {
+namespace isam
+{
+MatrixXd numericalDiff(Function& func)
+{
 #ifndef SYMMETRIC
   VectorXd y0 = func.evaluate();
 #endif
@@ -47,18 +48,21 @@ MatrixXd numericalDiff(Function& func) {
   // number of variables
   int n = 0;
   vector<Node*>& nodes = func.nodes();
-  for (vector<Node*>::iterator it = nodes.begin(); it!=nodes.end(); it++) {
+  for (vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++)
+  {
     n += (*it)->dim();
   }
   // result has one column per variable
-  MatrixXd Jacobian(m,n);
+  MatrixXd Jacobian(m, n);
   int col = 0;
   // for each node...
-  for (vector<Node*>::iterator it = nodes.begin(); it!=nodes.end(); it++) {
+  for (vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++)
+  {
     Node* node = *it;
     int dim_n = node->dim();
     // for each dimension of the node...
-    for (int j=0; j<dim_n; j++, col++) {
+    for (int j = 0; j < dim_n; j++, col++)
+    {
       VectorXd delta(dim_n);
       delta.setZero();
       // remember original value
@@ -86,4 +90,4 @@ MatrixXd numericalDiff(Function& func) {
   return Jacobian;
 }
 
-}
+}  // namespace isam

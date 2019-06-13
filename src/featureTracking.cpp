@@ -39,8 +39,10 @@ const int MAXFEATURENUM = maxFeatureNumPerSubregion * totalSubregionNum;
 
 const int xBoundary = 20;
 const int yBoundary = 20;
-const double subregionWidth = (double)(imageWidth - 2 * xBoundary) / (double)xSubregionNum;
-const double subregionHeight = (double)(imageHeight - 2 * yBoundary) / (double)ySubregionNum;
+const double subregionWidth =
+    (double)(imageWidth - 2 * xBoundary) / (double)xSubregionNum;
+const double subregionHeight =
+    (double)(imageHeight - 2 * yBoundary) / (double)ySubregionNum;
 
 const double maxTrackDis = 100;
 const int winSize = 15;
@@ -58,8 +60,10 @@ int featuresInd[2 * MAXFEATURENUM] = { 0 };
 int totalFeatureNum = 0;
 int subregionFeatureNum[2 * totalSubregionNum] = { 0 };
 
-pcl::PointCloud<ImagePoint>::Ptr imagePointsCur(new pcl::PointCloud<ImagePoint>());
-pcl::PointCloud<ImagePoint>::Ptr imagePointsLast(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    imagePointsCur(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    imagePointsLast(new pcl::PointCloud<ImagePoint>());
 
 ros::Publisher* imagePointsLastPubPointer;
 ros::Publisher* imageShowPubPointer;
@@ -114,11 +118,13 @@ void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
       {
         int subregionLeft = xBoundary + (int)(subregionWidth * j);
         int subregionTop = yBoundary + (int)(subregionHeight * i);
-        CvRect subregion = cvRect(subregionLeft, subregionTop, (int)subregionWidth, (int)subregionHeight);
+        CvRect subregion = cvRect(subregionLeft, subregionTop,
+                                  (int)subregionWidth, (int)subregionHeight);
         cvSetImageROI(imageLast, subregion);
 
-        cvGoodFeaturesToTrack(imageLast, imageEig, imageTmp, featuresLast + totalFeatureNum, &numToFind, 0.1, 5.0, NULL,
-                              3, 1, 0.04);
+        cvGoodFeaturesToTrack(imageLast, imageEig, imageTmp,
+                              featuresLast + totalFeatureNum, &numToFind, 0.1,
+                              5.0, NULL, 3, 1, 0.04);
 
         int numFound = 0;
         for (int k = 0; k < numToFind; k++)
@@ -129,10 +135,13 @@ void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
           int xInd = (featuresLast[totalFeatureNum + k].x + 0.5) / showDSRate;
           int yInd = (featuresLast[totalFeatureNum + k].y + 0.5) / showDSRate;
 
-          if (((float*)(harrisLast->imageData + harrisLast->widthStep * yInd))[xInd] > 1e-7)
+          if (((float*)(harrisLast->imageData +
+                        harrisLast->widthStep * yInd))[xInd] > 1e-7)
           {
-            featuresLast[totalFeatureNum + numFound].x = featuresLast[totalFeatureNum + k].x;
-            featuresLast[totalFeatureNum + numFound].y = featuresLast[totalFeatureNum + k].y;
+            featuresLast[totalFeatureNum + numFound].x =
+                featuresLast[totalFeatureNum + k].x;
+            featuresLast[totalFeatureNum + numFound].y =
+                featuresLast[totalFeatureNum + k].y;
             featuresInd[totalFeatureNum + numFound] = featuresIndFromStart;
 
             numFound++;
@@ -147,9 +156,11 @@ void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
     }
   }
 
-  cvCalcOpticalFlowPyrLK(imageLast, imageCur, pyrLast, pyrCur, featuresLast, featuresCur, totalFeatureNum,
-                         cvSize(winSize, winSize), 3, featuresFound, featuresError,
-                         cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 30, 0.01), 0);
+  cvCalcOpticalFlowPyrLK(
+      imageLast, imageCur, pyrLast, pyrCur, featuresLast, featuresCur,
+      totalFeatureNum, cvSize(winSize, winSize), 3, featuresFound,
+      featuresError,
+      cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 30, 0.01), 0);
 
   for (int i = 0; i < totalSubregionNum; i++)
   {
@@ -161,11 +172,15 @@ void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
   double meanShiftX = 0, meanShiftY = 0;
   for (int i = 0; i < totalFeatureNum; i++)
   {
-    double trackDis = sqrt((featuresLast[i].x - featuresCur[i].x) * (featuresLast[i].x - featuresCur[i].x) +
-                           (featuresLast[i].y - featuresCur[i].y) * (featuresLast[i].y - featuresCur[i].y));
+    double trackDis = sqrt((featuresLast[i].x - featuresCur[i].x) *
+                               (featuresLast[i].x - featuresCur[i].x) +
+                           (featuresLast[i].y - featuresCur[i].y) *
+                               (featuresLast[i].y - featuresCur[i].y));
 
-    if (!(trackDis > maxTrackDis || featuresCur[i].x < xBoundary || featuresCur[i].x > imageWidth - xBoundary ||
-          featuresCur[i].y < yBoundary || featuresCur[i].y > imageHeight - yBoundary))
+    if (!(trackDis > maxTrackDis || featuresCur[i].x < xBoundary ||
+          featuresCur[i].x > imageWidth - xBoundary ||
+          featuresCur[i].y < yBoundary ||
+          featuresCur[i].y > imageHeight - yBoundary))
     {
       int xInd = (int)((featuresLast[i].x - xBoundary) / subregionWidth);
       int yInd = (int)((featuresLast[i].y - yBoundary) / subregionHeight);
@@ -191,8 +206,12 @@ void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
           imagePointsLast->push_back(point);
         }
 
-        meanShiftX += fabs((featuresCur[featureCount].x - featuresLast[featureCount].x) / kImage[0]);
-        meanShiftY += fabs((featuresCur[featureCount].y - featuresLast[featureCount].y) / kImage[4]);
+        meanShiftX +=
+            fabs((featuresCur[featureCount].x - featuresLast[featureCount].x) /
+                 kImage[0]);
+        meanShiftY +=
+            fabs((featuresCur[featureCount].y - featuresLast[featureCount].y) /
+                 kImage[4]);
 
         featureCount++;
         subregionFeatureNum[ind]++;
@@ -236,12 +255,15 @@ int main(int argc, char** argv)
   pyrCur = cvCreateImage(pyrSize, IPL_DEPTH_32F, 1);
   pyrLast = cvCreateImage(pyrSize, IPL_DEPTH_32F, 1);
 
-  ros::Subscriber imageDataSub = nh.subscribe<sensor_msgs::Image>("/image/raw", 1, imageDataHandler);
+  ros::Subscriber imageDataSub =
+      nh.subscribe<sensor_msgs::Image>("/image/raw", 1, imageDataHandler);
 
-  ros::Publisher imagePointsLastPub = nh.advertise<sensor_msgs::PointCloud2>("/image_points_last", 5);
+  ros::Publisher imagePointsLastPub =
+      nh.advertise<sensor_msgs::PointCloud2>("/image_points_last", 5);
   imagePointsLastPubPointer = &imagePointsLastPub;
 
-  ros::Publisher imageShowPub = nh.advertise<sensor_msgs::Image>("/image/show", 1);
+  ros::Publisher imageShowPub =
+      nh.advertise<sensor_msgs::Image>("/image/show", 1);
   imageShowPubPointer = &imageShowPub;
 
   ros::spin();

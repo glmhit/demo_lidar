@@ -31,25 +31,29 @@
 
 #include "util.h"
 
-namespace isam {
-
+namespace isam
+{
 /*
- * robust error functions following Hartley&Zisserman book (2nd edition, pages 616-622)
- * summary:
+ * robust error functions following Hartley&Zisserman book (2nd edition, pages
+ * 616-622) summary:
  * - squared error is not robust
  * - Blake-Zisserman, corrupted Gaussian and Cauchy functions are
  *   non-convex, and therefore require very good initialization
- * - L1 yields a stable minimum, the median, but is non-differentiable at the origin
- * - Huber cost function is convex, combining squared near the origin, L1 further out
- * - pseudo-Huber is a good alternative to Huber, with continuous derivatives of all orders
+ * - L1 yields a stable minimum, the median, but is non-differentiable at the
+ * origin
+ * - Huber cost function is convex, combining squared near the origin, L1
+ * further out
+ * - pseudo-Huber is a good alternative to Huber, with continuous derivatives of
+ * all orders
  */
 
 /**
  * Standard squared cost function.
  * @param d Unmodified cost/distance.
  */
-inline double cost_squared(double d) {
-  return d*d;
+inline double cost_squared(double d)
+{
+  return d * d;
 }
 
 /**
@@ -57,8 +61,9 @@ inline double cost_squared(double d) {
  * @param d Unmodified cost/distance.
  * @param e Approximate crossover between inliers and outliers: d^2 = -log(e).
  */
-inline double cost_blake_zisserman(double d, double e) {
-  return -log(exp(-d*d) + e);
+inline double cost_blake_zisserman(double d, double e)
+{
+  return -log(exp(-d * d) + e);
 }
 
 /**
@@ -67,10 +72,11 @@ inline double cost_blake_zisserman(double d, double e) {
  * @param w Ratio of standard deviations of the outliers to the inliers.
  * @param a Expected fraction of inliers.
  */
-inline double cost_corrupted_gaussian(double d, double w, double a) {
-  double d2 = d*d;
-  double w2 = w*w;
-  return -log(a*exp(-d2) + (1.-a)*exp(-d2/w2)/w);
+inline double cost_corrupted_gaussian(double d, double w, double a)
+{
+  double d2 = d * d;
+  double w2 = w * w;
+  return -log(a * exp(-d2) + (1. - a) * exp(-d2 / w2) / w);
 }
 
 /**
@@ -79,9 +85,10 @@ inline double cost_corrupted_gaussian(double d, double w, double a) {
  * @param b Determines for which range of d the function closely
  *          approximates the squared error function.
  */
-inline double cost_cauchy(double d, double b = 1.) {
+inline double cost_cauchy(double d, double b = 1.)
+{
   // the first term is a constant and could be omitted
-  return log(M_PI/b) * log(1. + d*d/(b*b));
+  return log(M_PI / b) * log(1. + d * d / (b * b));
 }
 
 /**
@@ -89,8 +96,9 @@ inline double cost_cauchy(double d, double b = 1.) {
  * @param d Unmodified cost/distance.
  * @param b ?
  */
-inline double cost_l1(double d, double b = 0.5) {
-  return 2.*b*fabs(d);
+inline double cost_l1(double d, double b = 0.5)
+{
+  return 2. * b * fabs(d);
 }
 
 /**
@@ -98,12 +106,16 @@ inline double cost_l1(double d, double b = 0.5) {
  * @param d Unmodified cost/distance.
  * @param b Approximately the outlier threshold.
  */
-inline double cost_huber(double d, double b) {
+inline double cost_huber(double d, double b)
+{
   double abs_d = fabs(d);
-  if (abs_d < b) {
-    return d*d;
-  } else {
-    return 2*b*abs_d - b*b;
+  if (abs_d < b)
+  {
+    return d * d;
+  }
+  else
+  {
+    return 2 * b * abs_d - b * b;
   }
 }
 
@@ -112,9 +124,10 @@ inline double cost_huber(double d, double b) {
  * @param d Unmodified cost/distance.
  * @param b ?
  */
-inline double cost_pseudo_huber(double d, double b) {
-  double b2 = b*b;
-  return 2*b2*(sqrt(1+d*d/b2) - 1);
+inline double cost_pseudo_huber(double d, double b)
+{
+  double b2 = b * b;
+  return 2 * b2 * (sqrt(1 + d * d / b2) - 1);
 }
 
-}
+}  // namespace isam

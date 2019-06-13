@@ -10,29 +10,27 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
-struct ImagePoint {
-     float u, v;
-     int ind;
+struct ImagePoint
+{
+  float u, v;
+  int ind;
 };
 
-POINT_CLOUD_REGISTER_POINT_STRUCT (ImagePoint,
-                                   (float, u, u)
-                                   (float, v, v)
-                                   (int, ind, ind))
+POINT_CLOUD_REGISTER_POINT_STRUCT(ImagePoint,
+                                  (float, u, u)(float, v, v)(int, ind, ind))
 
-struct DepthPoint {
-     float u, v;
-     float depth;
-     int label;
-     int ind;
+struct DepthPoint
+{
+  float u, v;
+  float depth;
+  int label;
+  int ind;
 };
 
-POINT_CLOUD_REGISTER_POINT_STRUCT (DepthPoint,
-                                   (float, u, u)
-                                   (float, v, v)
-                                   (float, depth, depth)
-                                   (int, label, label)
-                                   (int, ind, ind))
+POINT_CLOUD_REGISTER_POINT_STRUCT(DepthPoint,
+                                  (float, u, u)(float, v,
+                                                v)(float, depth,
+                                                   depth)(int, label,
+                                                          label)(int, ind, ind))
 
 #endif
-

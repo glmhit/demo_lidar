@@ -19,11 +19,11 @@ double timeOdomAftBA;
 double rollRec, pitchRec, yawRec;
 double txRec, tyRec, tzRec;
 
-double transformBefBA[6] = {0};
-double transformAftBA[6] = {0};
+double transformBefBA[6] = { 0 };
+double transformAftBA[6] = { 0 };
 
-ros::Publisher *voData2PubPointer = NULL;
-tf::TransformBroadcaster *tfBroadcaster2Pointer = NULL;
+ros::Publisher* voData2PubPointer = NULL;
+tf::TransformBroadcaster* tfBroadcaster2Pointer = NULL;
 nav_msgs::Odometry voData2;
 tf::StampedTransform voDataTrans2;
 
@@ -66,39 +66,72 @@ void transformAssociateToBA()
   double salz = sin(transformAftBA[2]);
   double calz = cos(transformAftBA[2]);
 
-  double srx = -sbcx*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly) 
-             - cbcx*cbcz*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-             - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-             - cbcx*sbcz*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-             - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz);
+  double srx = -sbcx * (salx * sblx + calx * caly * cblx * cbly +
+                        calx * cblx * saly * sbly) -
+               cbcx * cbcz *
+                   (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+                    calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+                    cblx * cblz * salx) -
+               cbcx * sbcz *
+                   (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+                    calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+                    cblx * salx * sblz);
   pitchRec = asin(srx);
 
-  double srycrx = (cbcy*sbcz - cbcz*sbcx*sbcy)*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-                - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-                - (cbcy*cbcz + sbcx*sbcy*sbcz)*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-                - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz) 
-                + cbcx*sbcy*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly);
-  double crycrx = (cbcz*sbcy - cbcy*sbcx*sbcz)*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-                - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz) 
-                - (sbcy*sbcz + cbcy*cbcz*sbcx)*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-                - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-                + cbcx*cbcy*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly);
+  double srycrx =
+      (cbcy * sbcz - cbcz * sbcx * sbcy) *
+          (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+           calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+           cblx * cblz * salx) -
+      (cbcy * cbcz + sbcx * sbcy * sbcz) *
+          (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+           calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+           cblx * salx * sblz) +
+      cbcx * sbcy *
+          (salx * sblx + calx * caly * cblx * cbly + calx * cblx * saly * sbly);
+  double crycrx =
+      (cbcz * sbcy - cbcy * sbcx * sbcz) *
+          (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+           calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+           cblx * salx * sblz) -
+      (sbcy * sbcz + cbcy * cbcz * sbcx) *
+          (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+           calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+           cblx * cblz * salx) +
+      cbcx * cbcy *
+          (salx * sblx + calx * caly * cblx * cbly + calx * cblx * saly * sbly);
   yawRec = -atan2(srycrx / cos(-pitchRec), crycrx / cos(-pitchRec));
 
-  double srzcrx = sbcx*(cblx*cbly*(calz*saly - caly*salx*salz) 
-                - cblx*sbly*(caly*calz + salx*saly*salz) + calx*salz*sblx) 
-                - cbcx*cbcz*((caly*calz + salx*saly*salz)*(cbly*sblz - cblz*sblx*sbly) 
-                + (calz*saly - caly*salx*salz)*(sbly*sblz + cbly*cblz*sblx) 
-                - calx*cblx*cblz*salz) + cbcx*sbcz*((caly*calz + salx*saly*salz)*(cbly*cblz 
-                + sblx*sbly*sblz) + (calz*saly - caly*salx*salz)*(cblz*sbly - cbly*sblx*sblz) 
-                + calx*cblx*salz*sblz);
-  double crzcrx = sbcx*(cblx*sbly*(caly*salz - calz*salx*saly) 
-                - cblx*cbly*(saly*salz + caly*calz*salx) + calx*calz*sblx) 
-                + cbcx*cbcz*((saly*salz + caly*calz*salx)*(sbly*sblz + cbly*cblz*sblx) 
-                + (caly*salz - calz*salx*saly)*(cbly*sblz - cblz*sblx*sbly) 
-                + calx*calz*cblx*cblz) - cbcx*sbcz*((saly*salz + caly*calz*salx)*(cblz*sbly 
-                - cbly*sblx*sblz) + (caly*salz - calz*salx*saly)*(cbly*cblz + sblx*sbly*sblz) 
-                - calx*calz*cblx*sblz);
+  double srzcrx = sbcx * (cblx * cbly * (calz * saly - caly * salx * salz) -
+                          cblx * sbly * (caly * calz + salx * saly * salz) +
+                          calx * salz * sblx) -
+                  cbcx * cbcz *
+                      ((caly * calz + salx * saly * salz) *
+                           (cbly * sblz - cblz * sblx * sbly) +
+                       (calz * saly - caly * salx * salz) *
+                           (sbly * sblz + cbly * cblz * sblx) -
+                       calx * cblx * cblz * salz) +
+                  cbcx * sbcz *
+                      ((caly * calz + salx * saly * salz) *
+                           (cbly * cblz + sblx * sbly * sblz) +
+                       (calz * saly - caly * salx * salz) *
+                           (cblz * sbly - cbly * sblx * sblz) +
+                       calx * cblx * salz * sblz);
+  double crzcrx = sbcx * (cblx * sbly * (caly * salz - calz * salx * saly) -
+                          cblx * cbly * (saly * salz + caly * calz * salx) +
+                          calx * calz * sblx) +
+                  cbcx * cbcz *
+                      ((saly * salz + caly * calz * salx) *
+                           (sbly * sblz + cbly * cblz * sblx) +
+                       (caly * salz - calz * salx * saly) *
+                           (cbly * sblz - cblz * sblx * sbly) +
+                       calx * calz * cblx * cblz) -
+                  cbcx * sbcz *
+                      ((saly * salz + caly * calz * salx) *
+                           (cblz * sbly - cbly * sblx * sblz) +
+                       (caly * salz - calz * salx * saly) *
+                           (cbly * cblz + sblx * sbly * sblz) -
+                       calx * calz * cblx * sblz);
   rollRec = atan2(srzcrx / cos(-pitchRec), crzcrx / cos(-pitchRec));
 
   x1 = cos(rollRec) * txDiff - sin(rollRec) * tyDiff;
@@ -120,10 +153,11 @@ void transformAssociateToBA()
 
 void voDataHandler(const nav_msgs::Odometry::ConstPtr& voData)
 {
-  if (fabs(timeOdomBefBA - timeOdomAftBA) < 0.005) {
-
+  if (fabs(timeOdomBefBA - timeOdomAftBA) < 0.005)
+  {
     geometry_msgs::Quaternion geoQuat = voData->pose.pose.orientation;
-    tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(rollRec, pitchRec, yawRec);
+    tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w))
+        .getRPY(rollRec, pitchRec, yawRec);
 
     txRec = voData->pose.pose.position.x;
     tyRec = voData->pose.pose.position.y;
@@ -131,7 +165,8 @@ void voDataHandler(const nav_msgs::Odometry::ConstPtr& voData)
 
     transformAssociateToBA();
 
-    geoQuat = tf::createQuaternionMsgFromRollPitchYaw(rollRec, pitchRec, yawRec);
+    geoQuat =
+        tf::createQuaternionMsgFromRollPitchYaw(rollRec, pitchRec, yawRec);
 
     voData2.header.stamp = voData->header.stamp;
     voData2.pose.pose.orientation.x = -geoQuat.y;
@@ -144,7 +179,8 @@ void voDataHandler(const nav_msgs::Odometry::ConstPtr& voData)
     voData2PubPointer->publish(voData2);
 
     voDataTrans2.stamp_ = voData->header.stamp;
-    voDataTrans2.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
+    voDataTrans2.setRotation(
+        tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
     voDataTrans2.setOrigin(tf::Vector3(txRec, tyRec, tzRec));
     tfBroadcaster2Pointer->sendTransform(voDataTrans2);
   }
@@ -156,7 +192,8 @@ void odomBefBAHandler(const nav_msgs::Odometry::ConstPtr& odomBefBA)
 
   double roll, pitch, yaw;
   geometry_msgs::Quaternion geoQuat = odomBefBA->pose.pose.orientation;
-  tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(roll, pitch, yaw);
+  tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w))
+      .getRPY(roll, pitch, yaw);
 
   transformBefBA[0] = pitch;
   transformBefBA[1] = yaw;
@@ -173,7 +210,8 @@ void odomAftBAHandler(const nav_msgs::Odometry::ConstPtr& odomAftBA)
 
   double roll, pitch, yaw;
   geometry_msgs::Quaternion geoQuat = odomAftBA->pose.pose.orientation;
-  tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w)).getRPY(roll, pitch, yaw);
+  tf::Matrix3x3(tf::Quaternion(geoQuat.z, -geoQuat.x, -geoQuat.y, geoQuat.w))
+      .getRPY(roll, pitch, yaw);
 
   transformAftBA[0] = pitch;
   transformAftBA[1] = yaw;
@@ -189,16 +227,17 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "transformMaintenance");
   ros::NodeHandle nh;
 
-  ros::Subscriber voDataSub = nh.subscribe<nav_msgs::Odometry> 
-                              ("/cam_to_init", 1, voDataHandler);
+  ros::Subscriber voDataSub =
+      nh.subscribe<nav_msgs::Odometry>("/cam_to_init", 1, voDataHandler);
 
-  ros::Subscriber odomBefBASub = nh.subscribe<nav_msgs::Odometry> 
-                                 ("/bef_ba_to_init", 1, odomBefBAHandler);
+  ros::Subscriber odomBefBASub =
+      nh.subscribe<nav_msgs::Odometry>("/bef_ba_to_init", 1, odomBefBAHandler);
 
-  ros::Subscriber odomAftBASub = nh.subscribe<nav_msgs::Odometry> 
-                                 ("/aft_ba_to_init", 1, odomAftBAHandler);
+  ros::Subscriber odomAftBASub =
+      nh.subscribe<nav_msgs::Odometry>("/aft_ba_to_init", 1, odomAftBAHandler);
 
-  ros::Publisher voData2Pub = nh.advertise<nav_msgs::Odometry> ("/cam2_to_init", 1);
+  ros::Publisher voData2Pub =
+      nh.advertise<nav_msgs::Odometry>("/cam2_to_init", 1);
   voData2PubPointer = &voData2Pub;
   voData2.header.frame_id = "/camera_init";
   voData2.child_frame_id = "/camera2";

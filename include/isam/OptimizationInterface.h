@@ -33,18 +33,16 @@
 #include "SparseSystem.h"
 #include "Node.h"
 
-
-namespace isam {
-
+namespace isam
+{
 /**
  * Abstract base class providing an interface between the nonlinear system
  * to be optimized (stored in the Nodes of the Graph constructed in the SLAM)
  * and the Optimization class that actually performs the optimizations.
  */
-class OptimizationInterface {
-
+class OptimizationInterface
+{
 protected:
-
   /** Factored Jacobian about the current linearization point.*/
   SparseSystem _R;
 
@@ -57,11 +55,15 @@ public:
   virtual void swap_estimates() = 0;
   virtual Eigen::VectorXd weighted_errors(Selector s = ESTIMATE) = 0;
 
-  OptimizationInterface(): _R(1,1) {}
+  OptimizationInterface() : _R(1, 1)
+  {
+  }
 
-  virtual ~OptimizationInterface() {}
+  virtual ~OptimizationInterface()
+  {
+  }
 
   friend class Optimizer;
 };
 
-}
+}  // namespace isam

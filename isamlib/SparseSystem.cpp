@@ -26,7 +26,7 @@
  */
 
 #include <string>
-#include <cstring> // memset()
+#include <cstring>  // memset()
 #include <fstream>
 #include <iostream>
 #include <cmath>
@@ -38,28 +38,39 @@
 using namespace std;
 using namespace Eigen;
 
-namespace isam {
-
-SparseSystem::SparseSystem(int num_rows, int num_cols) : OrderedSparseMatrix(num_rows, num_cols), _rhs(VectorXd(num_rows)) {
+namespace isam
+{
+SparseSystem::SparseSystem(int num_rows, int num_cols)
+  : OrderedSparseMatrix(num_rows, num_cols), _rhs(VectorXd(num_rows))
+{
 }
 
-SparseSystem::SparseSystem(const SparseSystem& mat) : OrderedSparseMatrix(mat), _rhs(mat._rhs) {
+SparseSystem::SparseSystem(const SparseSystem& mat)
+  : OrderedSparseMatrix(mat), _rhs(mat._rhs)
+{
 }
 
-SparseSystem::SparseSystem(const SparseSystem& mat, int num_rows, int num_cols, int first_row, int first_col) :
-  OrderedSparseMatrix(mat, num_rows, num_cols, first_row, first_col), _rhs(mat._rhs.segment(first_row, num_rows)) {
+SparseSystem::SparseSystem(const SparseSystem& mat, int num_rows, int num_cols,
+                           int first_row, int first_col)
+  : OrderedSparseMatrix(mat, num_rows, num_cols, first_row, first_col)
+  , _rhs(mat._rhs.segment(first_row, num_rows))
+{
 }
 
-SparseSystem::SparseSystem(int num_rows, int num_cols, SparseVector_p* rows, const VectorXd& rhs) :
-  OrderedSparseMatrix(num_rows, num_cols, rows) {
+SparseSystem::SparseSystem(int num_rows, int num_cols, SparseVector_p* rows,
+                           const VectorXd& rhs)
+  : OrderedSparseMatrix(num_rows, num_cols, rows)
+{
   _rhs = rhs;
 }
 
-SparseSystem::~SparseSystem() {
+SparseSystem::~SparseSystem()
+{
 }
 
-const SparseSystem& SparseSystem::operator= (const SparseSystem& mat) {
-  if (this==&mat)
+const SparseSystem& SparseSystem::operator=(const SparseSystem& mat)
+{
+  if (this == &mat)
     return *this;
 
   OrderedSparseMatrix::operator=(mat);
@@ -68,23 +79,27 @@ const SparseSystem& SparseSystem::operator= (const SparseSystem& mat) {
   return *this;
 }
 
-void SparseSystem::apply_givens(int row, int col, double* c_givens, double* s_givens) {
+void SparseSystem::apply_givens(int row, int col, double* c_givens,
+                                double* s_givens)
+{
   double c, s;
   SparseMatrix::apply_givens(row, col, &c, &s);
   // modify rhs
   double r1 = _rhs(col);
   double r2 = _rhs(row);
-  _rhs(col) = c*r1 - s*r2;
-  _rhs(row) = s*r1 + c*r2;
+  _rhs(col) = c * r1 - s * r2;
+  _rhs(row) = s * r1 + c * r2;
 }
 
-void SparseSystem::append_new_rows(int num) {
+void SparseSystem::append_new_rows(int num)
+{
   OrderedSparseMatrix::append_new_rows(num);
   _rhs.conservativeResize(_rhs.size() + num);
 }
 
-void SparseSystem::add_row(const SparseVector& new_row, double new_r) {
-  ensure_num_cols(new_row.last()+1);
+void SparseSystem::add_row(const SparseVector& new_row, double new_r)
+{
+  ensure_num_cols(new_row.last() + 1);
 
   append_new_rows(1);
   int row = num_rows() - 1;
@@ -92,50 +107,59 @@ void SparseSystem::add_row(const SparseVector& new_row, double new_r) {
   set_row(row, new_row);
 }
 
-int SparseSystem::add_row_givens(const SparseVector& new_row, double new_r) {
+int SparseSystem::add_row_givens(const SparseVector& new_row, double new_r)
+{
   // set new row (also translates according to current variable ordering)
   add_row(new_row, new_r);
   int count = 0;
 
-  int row = num_rows() - 1; // last row
+  int row = num_rows() - 1;  // last row
 
-  int col = get_row(row).first(); // first entry to be zeroed
-  while (col>=0 && col<row) { // stop when we reach the diagonal
+  int col = get_row(row).first();  // first entry to be zeroed
+  while (col >= 0 && col < row)
+  {  // stop when we reach the diagonal
     apply_givens(row, col);
     count++;
     col = get_row(row).first();
   }
-  if (get_row(row).nnz()==0) {
+  if (get_row(row).nnz() == 0)
+  {
     // need to remove the new row as it is now empty
     remove_row();
     // and the rhs needs to be cut accordingly
-    VectorXd v = _rhs.segment(0, row); // temporary variable is necessary because of aliasing in Eigen
+    VectorXd v = _rhs.segment(0, row);  // temporary variable is necessary
+                                        // because of aliasing in Eigen
     _rhs = v;
   }
 
   return count;
 }
 
-VectorXd SparseSystem::solve() const {
-  requireDebug(num_rows() >= num_cols(), "SparseSystem::solve: cannot solve system, not enough constraints");
-  requireDebug(num_rows() == num_cols(), "SparseSystem::solve: system not triangular");
+VectorXd SparseSystem::solve() const
+{
+  requireDebug(num_rows() >= num_cols(), "SparseSystem::solve: cannot solve "
+                                         "system, not enough constraints");
+  requireDebug(num_rows() == num_cols(), "SparseSystem::solve: system not "
+                                         "triangular");
   int n = num_cols();
   VectorXd result(n);
-  for (int row=n-1; row>=0; row--) {
+  for (int row = n - 1; row >= 0; row--)
+  {
     const SparseVector& rowvec = get_row(row);
     // start with rhs...
     double terms = _rhs(row);
     double diag;
 
-    // ... and subtract already solved variables multiplied with respective coefficient from R
-    // We assume that the SpareSystem is triangular
+    // ... and subtract already solved variables multiplied with respective
+    // coefficient from R We assume that the SpareSystem is triangular
     SparseVectorIter iter(rowvec);
-    iter.get(diag); // we can check return value it should be == row
+    iter.get(diag);  // we can check return value it should be == row
     iter.next();
-    for (; iter.valid(); iter.next()) {
+    for (; iter.valid(); iter.next())
+    {
       double v;
       int col = iter.get(v);
-      terms = terms - result(col)*v;
+      terms = terms - result(col) * v;
     }
     // divide result by diagonal entry of R
     result(row) = terms / diag;
@@ -143,4 +167,4 @@ VectorXd SparseSystem::solve() const {
   return result;
 }
 
-}
+}  // namespace isam

@@ -36,12 +36,11 @@
 #include "Cholesky.h"
 #include "Node.h"
 
-namespace isam {
-
-class Optimizer {
-
+namespace isam
+{
+class Optimizer
+{
 private:
-
   /**
    * Provides an interface for manipulating the linearized system in
    * the Slam class.
@@ -76,7 +75,6 @@ private:
    */
   double current_SSE_at_linpoint;
 
-
   void update_trust_radius(double rho, double hdl_norm);
 
   /**
@@ -86,15 +84,17 @@ private:
    * will be used to compute the gain ratio.
    */
   Eigen::VectorXd compute_dog_leg(double alpha, const Eigen::VectorXd& h_sd,
-      const Eigen::VectorXd& h_gn, double delta,
-      double& gain_ratio_denominator);
+                                  const Eigen::VectorXd& h_gn, double delta,
+                                  double& gain_ratio_denominator);
 
   bool powells_dog_leg_update(double epsilon1, double epsilon3,
-      SparseSystem& jacobian, Eigen::VectorXd& f_x, Eigen::VectorXd& gradient);
+                              SparseSystem& jacobian, Eigen::VectorXd& f_x,
+                              Eigen::VectorXd& gradient);
 
   /**
    * Given an input vector v and an array of ints representing a permutation,
-   * applies the permutation to the elements of v and returns the permuted vector
+   * applies the permutation to the elements of v and returns the permuted
+   * vector
    * @param v Input vector.
    * @param permutation  An array of ints representing the permutation to be
    *                     applied to the elements of v.
@@ -103,7 +103,7 @@ private:
    *          permutation[i]-th element of p.
    */
   void permute_vector(const Eigen::VectorXd& v, Eigen::VectorXd& p,
-      const int* permutation);
+                      const int* permutation);
 
   /**
    * Helper method for computing the Gauss-Newton step h_{gn} in Gauss-Newton,
@@ -118,7 +118,8 @@ private:
    * @return h_gn
    */
   Eigen::VectorXd compute_gauss_newton_step(const SparseSystem& jacobian,
-      SparseSystem* R = NULL, double lambda = 0.);
+                                            SparseSystem* R = NULL,
+                                            double lambda = 0.);
 
   void gauss_newton(const Properties& prop, int* num_iterations = NULL);
 
@@ -146,14 +147,13 @@ private:
    * @param epsilon3
    */
   void powells_dog_leg(int* num_iterations = NULL, double delta0 = 1.0,
-      int max_iterations = 0, double epsilon1 = 1e-4, double epsilon2 = 1e-4,
-      double epsilon3 = 1e-4);
+                       int max_iterations = 0, double epsilon1 = 1e-4,
+                       double epsilon2 = 1e-4, double epsilon3 = 1e-4);
 
 public:
-
-  Optimizer(OptimizationInterface& fs)
-      : function_system(fs), Delta(1.0) {
-    //Initialize the Cholesky object
+  Optimizer(OptimizationInterface& fs) : function_system(fs), Delta(1.0)
+  {
+    // Initialize the Cholesky object
     _cholesky = Cholesky::Create();
   }
 
@@ -215,10 +215,10 @@ public:
    */
   void update_estimate(const Properties& prop);
 
-  ~Optimizer() {
+  ~Optimizer()
+  {
     delete _cholesky;
   }
-
 };
 
-}
+}  // namespace isam

@@ -34,10 +34,11 @@
 #include <fstream>
 #include <iostream>
 
-namespace isam {
-
-class OrderedSparseMatrix : public SparseMatrix {
-  int* _r_to_a; // column variable order
+namespace isam
+{
+class OrderedSparseMatrix : public SparseMatrix
+{
+  int* _r_to_a;  // column variable order
   int* _a_to_r;
 
   /**
@@ -72,7 +73,6 @@ class OrderedSparseMatrix : public SparseMatrix {
   void _set_order(const int* r_to_a);
 
 public:
-
   /**
    * Constructor.
    * @param num_rows Initial number of rows.
@@ -95,13 +95,13 @@ public:
    * @param first_col Column offset.
    */
   OrderedSparseMatrix(const OrderedSparseMatrix& mat, int num_rows,
-      int num_cols, int first_row = 0, int first_col = 0);
+                      int num_cols, int first_row = 0, int first_col = 0);
 
   OrderedSparseMatrix(int num_rows, int num_cols, SparseVector_p* rows);
 
   /**
-  * Destructor.
-  */
+   * Destructor.
+   */
   virtual ~OrderedSparseMatrix();
 
   /**
@@ -109,12 +109,13 @@ public:
    * @param mat Right-hand-side matrix in assignment
    * @return self.
    */
-  const OrderedSparseMatrix& operator= (const OrderedSparseMatrix& mat);
+  const OrderedSparseMatrix& operator=(const OrderedSparseMatrix& mat);
 
   // overridden functions
 
   /**
-   * Replace the given row. Also reorders the new vector according to internal ordering.
+   * Replace the given row. Also reorders the new vector according to internal
+   * ordering.
    * @param row Number of row to replace.
    * @param new_row New row vector.
    */
@@ -127,7 +128,8 @@ public:
    * @param rows Array of SparseVector of length num_rows.
    * @param r_to_a Variable ordering.
    */
-  void import_rows_ordered(int num_rows, int num_cols, SparseVector_p* rows, int* r_to_a);
+  void import_rows_ordered(int num_rows, int num_cols, SparseVector_p* rows,
+                           int* r_to_a);
 
   /**
    * Expand matrix to include new columns.
@@ -150,7 +152,6 @@ public:
    * which column it originally came from in A.
    */
   virtual const int* r_to_a() const;
-
 };
 
-}
+}  // namespace isam

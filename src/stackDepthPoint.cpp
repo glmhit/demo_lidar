@@ -13,15 +13,17 @@ double depthPointsTime[keyframeNum];
 int keyframeCount = 0;
 int frameCount = 0;
 
-pcl::PointCloud<DepthPoint>::Ptr depthPointsStacked(new pcl::PointCloud<DepthPoint>());
-ros::Publisher *depthPointsPubPointer = NULL;
+pcl::PointCloud<DepthPoint>::Ptr
+    depthPointsStacked(new pcl::PointCloud<DepthPoint>());
+ros::Publisher* depthPointsPubPointer = NULL;
 
 double lastPubTime = 0;
 
 void depthPointsHandler(const sensor_msgs::PointCloud2ConstPtr& depthPoints2)
 {
   frameCount = (frameCount + 1) % 5;
-  if (frameCount != 0) {
+  if (frameCount != 0)
+  {
     return;
   }
 
@@ -29,7 +31,8 @@ void depthPointsHandler(const sensor_msgs::PointCloud2ConstPtr& depthPoints2)
   depthPointsCur->clear();
   pcl::fromROSMsg(*depthPoints2, *depthPointsCur);
 
-  for (int i = 0; i < keyframeNum - 1; i++) {
+  for (int i = 0; i < keyframeNum - 1; i++)
+  {
     depthPoints[i] = depthPoints[i + 1];
     depthPointsTime[i] = depthPointsTime[i + 1];
   }
@@ -37,9 +40,11 @@ void depthPointsHandler(const sensor_msgs::PointCloud2ConstPtr& depthPoints2)
   depthPointsTime[keyframeNum - 1] = depthPoints2->header.stamp.toSec();
 
   keyframeCount++;
-  if (keyframeCount >= keyframeNum && depthPointsTime[0] >= lastPubTime) {
+  if (keyframeCount >= keyframeNum && depthPointsTime[0] >= lastPubTime)
+  {
     depthPointsStacked->clear();
-    for (int i = 0; i < keyframeNum; i++) {
+    for (int i = 0; i < keyframeNum; i++)
+    {
       *depthPointsStacked += *depthPoints[i];
     }
 
@@ -58,15 +63,18 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "stackDepthPoint");
   ros::NodeHandle nh;
 
-  for (int i = 0; i < keyframeNum; i++) {
-    pcl::PointCloud<DepthPoint>::Ptr depthPointsTemp(new pcl::PointCloud<DepthPoint>());
+  for (int i = 0; i < keyframeNum; i++)
+  {
+    pcl::PointCloud<DepthPoint>::Ptr depthPointsTemp(
+        new pcl::PointCloud<DepthPoint>());
     depthPoints[i] = depthPointsTemp;
   }
 
-  ros::Subscriber depthPointsSub = nh.subscribe<sensor_msgs::PointCloud2>
-                                   ("/depth_points_last", 5, depthPointsHandler);
+  ros::Subscriber depthPointsSub = nh.subscribe<sensor_msgs::PointCloud2>(
+      "/depth_points_last", 5, depthPointsHandler);
 
-  ros::Publisher depthPointsPub = nh.advertise<sensor_msgs::PointCloud2> ("/depth_points_stacked", 1);
+  ros::Publisher depthPointsPub =
+      nh.advertise<sensor_msgs::PointCloud2>("/depth_points_stacked", 1);
   depthPointsPubPointer = &depthPointsPub;
 
   ros::spin();

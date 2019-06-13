@@ -37,34 +37,35 @@
 
 #include "Node.h"
 
-
-namespace isam {
-
-
+namespace isam
+{
 /**
  * ChowLiuTreeInfo
  * Information for Gaussian distribtuion for chow liu tree
  *
  */
-class ChowLiuTreeInfo {
-
+class ChowLiuTreeInfo
+{
 private:
-
   const Eigen::MatrixXd& _L;
-  const std::vector<Node *>& _nodes;
+  const std::vector<Node*>& _nodes;
 
 public:
-
   /**
    * Constructor.
    * @param L the information matrix
    * @param nodes the nodes in the information matrix
    */
-  ChowLiuTreeInfo (const Eigen::MatrixXd& L, const std::vector<Node *>& nodes)
-      : _L(L), _nodes(nodes) { }
+  ChowLiuTreeInfo(const Eigen::MatrixXd& L, const std::vector<Node*>& nodes)
+    : _L(L), _nodes(nodes)
+  {
+  }
 
-  //const std::vector<Node *>& nodes() {return _nodes;}
-  int num_nodes() {return _nodes.size();}
+  // const std::vector<Node *>& nodes() {return _nodes;}
+  int num_nodes()
+  {
+    return _nodes.size();
+  }
 
   /**
    * Marginal distribution
@@ -76,14 +77,13 @@ public:
    * Joint distribution
    * @return Information matrix P(node[ida], node[idb])
    */
-  Eigen::MatrixXd joint(int ida, int idb); // a, b
+  Eigen::MatrixXd joint(int ida, int idb);  // a, b
 
   /**
    * Conditional distribution
    * @return Information matrix P(node[ida] | node[idb])
    */
   Eigen::MatrixXd conditional(int ida, int idb);
-
 };
 
 /**
@@ -91,44 +91,45 @@ public:
  * A node in the chowliu tree
  *
  */
-class ChowLiuTreeNode {
-
+class ChowLiuTreeNode
+{
 public:
-  
   int id;
   int pid;
   std::vector<int> cids;
   Eigen::MatrixXd marginal;     // marginal information
   Eigen::MatrixXd conditional;  // conditional information with parrent
   Eigen::MatrixXd joint;        // joint information with parrent
-  
-  bool is_root () { return (pid == -1) ? true : false; }
-  bool is_leaf () { return (cids.size() == 0) ? true : false; }
 
+  bool is_root()
+  {
+    return (pid == -1) ? true : false;
+  }
+  bool is_leaf()
+  {
+    return (cids.size() == 0) ? true : false;
+  }
 };
 
-class MI {
-  
+class MI
+{
 public:
   int id1;
   int id2;
   double mi;
 
-  MI (int id1_, int id2_, double mi_)
-    : id1(id1_), id2(id2_), mi(mi_){
+  MI(int id1_, int id2_, double mi_) : id1(id1_), id2(id2_), mi(mi_)
+  {
   }
-
 };
-
-
 
 /**
  * ChowLiuTree
  * Chow Liu Tree class for information form gaussian distribtuions
  *
  */
-class ChowLiuTree {
-
+class ChowLiuTree
+{
   ChowLiuTreeInfo _clt_info;
   std::list<MI> _edges;
 
@@ -138,13 +139,10 @@ class ChowLiuTree {
   void _build_tree_rec(int id, int pid);
 
 public:
-
   // the resulting chow-liu tree
   std::map<int, ChowLiuTreeNode> tree;
 
-  ChowLiuTree (const Eigen::MatrixXd &L, const std::vector<Node *>& nodes);
-  
+  ChowLiuTree(const Eigen::MatrixXd& L, const std::vector<Node*>& nodes);
 };
 
-
-} // namespace isam
+}  // namespace isam

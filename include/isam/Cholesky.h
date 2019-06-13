@@ -31,11 +31,14 @@
 
 #include "SparseSystem.h"
 
-namespace isam {
-
-class Cholesky {
+namespace isam
+{
+class Cholesky
+{
 public:
-  virtual ~Cholesky() {}
+  virtual ~Cholesky()
+  {
+  }
 
   /**
    * Factorize a given system Ax=b and optionally solve.
@@ -44,7 +47,8 @@ public:
    * @param lambda Adds elements to diagonal of information matrix A'A before
    *        factorization, used for Levenberg-Marquardt algorithm.
    */
-  virtual void factorize(const SparseSystem& Ab, Eigen::VectorXd* delta = NULL, double lambda = 0.) = 0;
+  virtual void factorize(const SparseSystem& Ab, Eigen::VectorXd* delta = NULL,
+                         double lambda = 0.) = 0;
 
   /**
    * Copy R into a SparseSystem data structure (expensive, so can be
@@ -62,7 +66,9 @@ public:
   static Cholesky* Create();
 
 protected:
-  Cholesky() {}
+  Cholesky()
+  {
+  }
 };
 
-}
+}  // namespace isam

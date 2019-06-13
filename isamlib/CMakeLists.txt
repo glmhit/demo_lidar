@@ -14,11 +14,20 @@ target_link_libraries(isamlib ${CHOLMOD_LIBRARIES})
 
 # install library
 install(TARGETS isamlib
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
+                PERMISSIONS
+                OWNER_READ
+                OWNER_WRITE
+                OWNER_EXECUTE
+                GROUP_READ
+                GROUP_EXECUTE
+                WORLD_READ
+                WORLD_EXECUTE
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
 # install header files
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/isam/ DESTINATION include/isam
-          FILES_MATCHING PATTERN "*.h" PATTERN ".svn" EXCLUDE)
-
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/isam/
+        DESTINATION include/isam
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN ".svn"
+        EXCLUDE)

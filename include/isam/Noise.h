@@ -28,37 +28,49 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <Eigen/LU> 
+#include <Eigen/LU>
 
-namespace isam {
-
+namespace isam
+{
 // general noise model class
-class Noise {
+class Noise
+{
 public:
   Eigen::MatrixXd _sqrtinf;
-  const Eigen::MatrixXd& sqrtinf() const {return _sqrtinf;}
+  const Eigen::MatrixXd& sqrtinf() const
+  {
+    return _sqrtinf;
+  }
 };
 
 // noise model based on square root information matrix
-class SqrtInformation : public Noise {
+class SqrtInformation : public Noise
+{
 public:
-  SqrtInformation(const Eigen::MatrixXd& sqrtinf) {_sqrtinf = sqrtinf;}
+  SqrtInformation(const Eigen::MatrixXd& sqrtinf)
+  {
+    _sqrtinf = sqrtinf;
+  }
 };
 
 // noise model based on information matrix
-class Information : public Noise {
+class Information : public Noise
+{
 public:
-  Information(const Eigen::MatrixXd& inf) {
+  Information(const Eigen::MatrixXd& inf)
+  {
     _sqrtinf = inf.llt().matrixU();
   }
 };
 
 // noise model based on covariance matrix
-class Covariance : public Noise {
+class Covariance : public Noise
+{
 public:
-  Covariance(const Eigen::MatrixXd& cov) {
+  Covariance(const Eigen::MatrixXd& cov)
+  {
     _sqrtinf = cov.inverse().llt().matrixU();
   }
 };
 
-}
+}  // namespace isam

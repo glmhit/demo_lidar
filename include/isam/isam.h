@@ -41,7 +41,6 @@
 #include <isam/Noise.h>
 #include <isam/Properties.h>
 
-
 // Doxygen documentation follows
 
 /** @mainpage iSAM: Incremental Smoothing and Mapping (v1.6)
@@ -102,7 +101,9 @@ This software was tested under Ubuntu 9.04-11.04, and Mac OS X
 10.5-10.6. iSAM depends on the following software:
 
 @li CMake (version 2.8 or higher)
-@li CHOLMOD (sparse matrix libraries by <a href="http://www.cise.ufl.edu/~davis/" target="_top">Tim Davis</a>, University of Florida)
+@li CHOLMOD (sparse matrix libraries by <a
+href="http://www.cise.ufl.edu/~davis/" target="_top">Tim Davis</a>, University
+of Florida)
 @li Eigen (version 3)
 @li SDL (optional, needed for 3D viewer)
 @li doxygen (optional, to generate documentation)
@@ -111,7 +112,8 @@ This software was tested under Ubuntu 9.04-11.04, and Mac OS X
 To install all required packages in Ubuntu 9.10 and later, simply type:
 
 @verbatim
-sudo apt-get install cmake libsuitesparse-dev libeigen3-dev libsdl1.2-dev doxygen graphviz
+sudo apt-get install cmake libsuitesparse-dev libeigen3-dev libsdl1.2-dev
+doxygen graphviz
 @endverbatim
 
 Note that CHOLMOD is contained in SuiteSparse. On Mac OS X, SuiteSparse
@@ -133,7 +135,8 @@ Directory structure:
 @li @c isamlib/ contains the source code for the iSAM library
 @li @c include/ contains the header files for the iSAM library
 @li @c isam/ contains the source code for the iSAM executable
-@li @c examples/ contains examples for using different components of the iSAM library
+@li @c examples/ contains examples for using different components of the iSAM
+library
 @li @c doc/ contains the documentation (after calling "make doc")
 @li @c misc/ contains code referenced from publications
 @li @c data/ contains example data files

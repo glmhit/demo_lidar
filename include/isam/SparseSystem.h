@@ -31,20 +31,30 @@
 
 #include "OrderedSparseMatrix.h"
 
-namespace isam {
-
-class SparseSystem : public OrderedSparseMatrix {
+namespace isam
+{
+class SparseSystem : public OrderedSparseMatrix
+{
   Eigen::VectorXd _rhs;
+
 public:
   SparseSystem(int num_rows, int num_cols);
   SparseSystem(const SparseSystem& mat);
-  SparseSystem(const SparseSystem& mat, int num_rows, int num_cols, int first_row = 0, int first_col = 0);
-  SparseSystem(int num_rows, int num_cols, SparseVector_p* rows, const Eigen::VectorXd& rhs);
+  SparseSystem(const SparseSystem& mat, int num_rows, int num_cols,
+               int first_row = 0, int first_col = 0);
+  SparseSystem(int num_rows, int num_cols, SparseVector_p* rows,
+               const Eigen::VectorXd& rhs);
   virtual ~SparseSystem();
-  const SparseSystem& operator= (const SparseSystem& mat);
+  const SparseSystem& operator=(const SparseSystem& mat);
 
-  const Eigen::VectorXd& rhs() const {return _rhs;}
-  void set_rhs(const Eigen::VectorXd& rhs) {_rhs = rhs;}
+  const Eigen::VectorXd& rhs() const
+  {
+    return _rhs;
+  }
+  void set_rhs(const Eigen::VectorXd& rhs)
+  {
+    _rhs = rhs;
+  }
 
   // overridden functions
 
@@ -53,7 +63,8 @@ public:
    * contain the new entry - necessary because we cannot change the
    * signature of the function.
    */
-  void apply_givens(int row, int col, double* c_givens = NULL, double* s_givens = NULL);
+  void apply_givens(int row, int col, double* c_givens = NULL,
+                    double* s_givens = NULL);
 
   void append_new_rows(int num);
 
@@ -79,7 +90,6 @@ public:
    * @return Solution for x in Rx=b'
    */
   virtual Eigen::VectorXd solve() const;
-
 };
 
-}
+}  // namespace isam

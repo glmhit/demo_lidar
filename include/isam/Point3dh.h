@@ -32,10 +32,12 @@
 
 #include "Point3d.h"
 
-namespace isam {
-
-class Point3dh {
-  friend std::ostream& operator<<(std::ostream& out, const Point3dh& p) {
+namespace isam
+{
+class Point3dh
+{
+  friend std::ostream& operator<<(std::ostream& out, const Point3dh& p)
+  {
     p.write(out);
     return out;
   }
@@ -46,41 +48,79 @@ class Point3dh {
   double _w;
 
 public:
-
   static const int dim = 3;
   static const int size = 4;
-  static const char* name() {
+  static const char* name()
+  {
     return "Point3dh";
   }
 
-  Point3dh() : _x(0.), _y(0.), _z(0.), _w(1.) {} // note: 0,0,0,0 is not allowed!
-  Point3dh(double x, double y, double z, double w) : _x(x), _y(y), _z(z), _w(w) {}
-  Point3dh(const Eigen::Vector4d& vec) : _x(vec(0)), _y(vec(1)), _z(vec(2)), _w(vec(3)) {}
-  Point3dh(const Point3d& p) : _x(p.x()), _y(p.y()), _z(p.z()), _w(1.) {}
-
-  double x() const {return _x;}
-  double y() const {return _y;}
-  double z() const {return _z;}
-  double w() const {return _w;}
-
-  void x(double x) {_x = x;}
-  void y(double y) {_y = y;}
-  void z(double z) {_z = z;}
-  void w(double w) {_w = w;}
-
-  static Eigen::Vector4d delta3_to_homogeneous(const Eigen::Vector3d& delta) {
-    double theta = delta.norm();
-    double S;
-    if (theta < 0.0001) { // sqrt4(machine precession)
-      S = 0.5 + theta*theta/48.;
-    } else {
-      S = sin(0.5*theta)/theta;
-    }
-    double C = cos(0.5*theta);
-    return Eigen::Vector4d(S*delta(0), S*delta(1), S*delta(2), C);
+  Point3dh() : _x(0.), _y(0.), _z(0.), _w(1.)
+  {
+  }  // note: 0,0,0,0 is not allowed!
+  Point3dh(double x, double y, double z, double w) : _x(x), _y(y), _z(z), _w(w)
+  {
+  }
+  Point3dh(const Eigen::Vector4d& vec)
+    : _x(vec(0)), _y(vec(1)), _z(vec(2)), _w(vec(3))
+  {
+  }
+  Point3dh(const Point3d& p) : _x(p.x()), _y(p.y()), _z(p.z()), _w(1.)
+  {
   }
 
-  Point3dh exmap(const Eigen::Vector3d& delta) const {
+  double x() const
+  {
+    return _x;
+  }
+  double y() const
+  {
+    return _y;
+  }
+  double z() const
+  {
+    return _z;
+  }
+  double w() const
+  {
+    return _w;
+  }
+
+  void x(double x)
+  {
+    _x = x;
+  }
+  void y(double y)
+  {
+    _y = y;
+  }
+  void z(double z)
+  {
+    _z = z;
+  }
+  void w(double w)
+  {
+    _w = w;
+  }
+
+  static Eigen::Vector4d delta3_to_homogeneous(const Eigen::Vector3d& delta)
+  {
+    double theta = delta.norm();
+    double S;
+    if (theta < 0.0001)
+    {  // sqrt4(machine precession)
+      S = 0.5 + theta * theta / 48.;
+    }
+    else
+    {
+      S = sin(0.5 * theta) / theta;
+    }
+    double C = cos(0.5 * theta);
+    return Eigen::Vector4d(S * delta(0), S * delta(1), S * delta(2), C);
+  }
+
+  Point3dh exmap(const Eigen::Vector3d& delta) const
+  {
 #if 0
     // solution with Householder matrix following HZ second edition
 
@@ -118,13 +158,29 @@ public:
     res.normalize();
     Eigen::Vector4d::Index pos;
     res.vector().cwiseAbs().maxCoeff(&pos);
-    //    std::cout << *this << " -- " << pos << " -- " << res.vector() << std::endl;
+    //    std::cout << *this << " -- " << pos << " -- " << res.vector() <<
+    //    std::endl;
     // only update 3 out of 4 entries
     int idx = 0;
-    if (pos!=0) {res._x += delta(idx); idx++;}
-    if (pos!=1) {res._y += delta(idx); idx++;}
-    if (pos!=2) {res._z += delta(idx); idx++;}
-    if (pos!=3) {res._w += delta(idx);}
+    if (pos != 0)
+    {
+      res._x += delta(idx);
+      idx++;
+    }
+    if (pos != 1)
+    {
+      res._y += delta(idx);
+      idx++;
+    }
+    if (pos != 2)
+    {
+      res._z += delta(idx);
+      idx++;
+    }
+    if (pos != 3)
+    {
+      res._w += delta(idx);
+    }
     res.normalize();
     return res;
 #else
@@ -140,42 +196,49 @@ public:
 #endif
   }
 
-  Eigen::Vector4d vector() const {
+  Eigen::Vector4d vector() const
+  {
     Eigen::VectorXd tmp(4);
     tmp << _x, _y, _z, _w;
     return tmp;
   }
 
-  Eigen::VectorXb is_angle() const {
-    Eigen::VectorXb isang (4);
+  Eigen::VectorXb is_angle() const
+  {
+    Eigen::VectorXb isang(4);
     isang << false, false, false, false;
     return isang;
   }
 
-  void set(double x, double y, double z, double w) {
+  void set(double x, double y, double z, double w)
+  {
     _x = x;
     _y = y;
     _z = z;
     _w = w;
   }
 
-  void set(const Eigen::Vector4d& v) {
+  void set(const Eigen::Vector4d& v)
+  {
     _x = v(0);
     _y = v(1);
     _z = v(2);
     _w = v(3);
   }
 
-  Point3d to_point3d() const {
+  Point3d to_point3d() const
+  {
     double w_inv = 1. / _w;
-    return Point3d(_x*w_inv, _y*w_inv, _z*w_inv);
+    return Point3d(_x * w_inv, _y * w_inv, _z * w_inv);
   }
 
-  double norm() const {
-    return sqrt(_x*_x + _y*_y + _z*_z + _w*_w);
+  double norm() const
+  {
+    return sqrt(_x * _x + _y * _y + _z * _z + _w * _w);
   }
 
-  Point3dh normalize() {
+  Point3dh normalize()
+  {
     double a = 1. / norm();
     _x *= a;
     _y *= a;
@@ -184,9 +247,10 @@ public:
     return *this;
   }
 
-  void write(std::ostream &out) const {
+  void write(std::ostream& out) const
+  {
     out << "(" << _x << ", " << _y << ", " << _z << ", " << _w << ")";
   }
 };
 
-}
+}  // namespace isam

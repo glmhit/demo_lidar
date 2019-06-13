@@ -15,18 +15,30 @@
 
 const double PI = 3.1415926;
 
-pcl::PointCloud<ImagePoint>::Ptr imagePointsCur(new pcl::PointCloud<ImagePoint>());
-pcl::PointCloud<ImagePoint>::Ptr imagePointsLast(new pcl::PointCloud<ImagePoint>());
-pcl::PointCloud<ImagePoint>::Ptr startPointsCur(new pcl::PointCloud<ImagePoint>());
-pcl::PointCloud<ImagePoint>::Ptr startPointsLast(new pcl::PointCloud<ImagePoint>());
-pcl::PointCloud<pcl::PointXYZHSV>::Ptr startTransCur(new pcl::PointCloud<pcl::PointXYZHSV>());
-pcl::PointCloud<pcl::PointXYZHSV>::Ptr startTransLast(new pcl::PointCloud<pcl::PointXYZHSV>());
-pcl::PointCloud<pcl::PointXYZHSV>::Ptr ipRelations(new pcl::PointCloud<pcl::PointXYZHSV>());
-pcl::PointCloud<pcl::PointXYZHSV>::Ptr ipRelations2(new pcl::PointCloud<pcl::PointXYZHSV>());
-pcl::PointCloud<pcl::PointXYZ>::Ptr imagePointsProj(new pcl::PointCloud<pcl::PointXYZ>());
-pcl::PointCloud<DepthPoint>::Ptr depthPointsCur(new pcl::PointCloud<DepthPoint>());
-pcl::PointCloud<DepthPoint>::Ptr depthPointsLast(new pcl::PointCloud<DepthPoint>());
-pcl::PointCloud<DepthPoint>::Ptr depthPointsSend(new pcl::PointCloud<DepthPoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    imagePointsCur(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    imagePointsLast(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    startPointsCur(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<ImagePoint>::Ptr
+    startPointsLast(new pcl::PointCloud<ImagePoint>());
+pcl::PointCloud<pcl::PointXYZHSV>::Ptr
+    startTransCur(new pcl::PointCloud<pcl::PointXYZHSV>());
+pcl::PointCloud<pcl::PointXYZHSV>::Ptr
+    startTransLast(new pcl::PointCloud<pcl::PointXYZHSV>());
+pcl::PointCloud<pcl::PointXYZHSV>::Ptr
+    ipRelations(new pcl::PointCloud<pcl::PointXYZHSV>());
+pcl::PointCloud<pcl::PointXYZHSV>::Ptr
+    ipRelations2(new pcl::PointCloud<pcl::PointXYZHSV>());
+pcl::PointCloud<pcl::PointXYZ>::Ptr
+    imagePointsProj(new pcl::PointCloud<pcl::PointXYZ>());
+pcl::PointCloud<DepthPoint>::Ptr
+    depthPointsCur(new pcl::PointCloud<DepthPoint>());
+pcl::PointCloud<DepthPoint>::Ptr
+    depthPointsLast(new pcl::PointCloud<DepthPoint>());
+pcl::PointCloud<DepthPoint>::Ptr
+    depthPointsSend(new pcl::PointCloud<DepthPoint>());
 
 std::vector<int> ipInd;
 std::vector<float> ipy2;
@@ -43,8 +55,10 @@ int imagePointsLastNum = 0;
 int depthPointsCurNum = 0;
 int depthPointsLastNum = 0;
 
-pcl::PointCloud<pcl::PointXYZI>::Ptr depthCloud(new pcl::PointCloud<pcl::PointXYZI>());
-pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr kdTree(new pcl::KdTreeFLANN<pcl::PointXYZI>());
+pcl::PointCloud<pcl::PointXYZI>::Ptr
+    depthCloud(new pcl::PointCloud<pcl::PointXYZI>());
+pcl::KdTreeFLANN<pcl::PointXYZI>::Ptr
+    kdTree(new pcl::KdTreeFLANN<pcl::PointXYZI>());
 
 double depthCloudTime;
 int depthCloudNum = 0;
@@ -52,8 +66,8 @@ int depthCloudNum = 0;
 std::vector<int> pointSearchInd;
 std::vector<float> pointSearchSqrDis;
 
-double transformSum[6] = {0};
-double angleSum[3] = {0};
+double transformSum[6] = { 0 };
+double angleSum[3] = { 0 };
 
 int imuPointerFront = 0;
 int imuPointerLast = -1;
@@ -64,56 +78,74 @@ double imuRollCur = 0, imuPitchCur = 0, imuYawCur = 0;
 double imuRollLast = 0, imuPitchLast = 0, imuYawLast = 0;
 
 double imuYawInit = 0;
-double imuTime[imuQueLength] = {0};
-double imuRoll[imuQueLength] = {0};
-double imuPitch[imuQueLength] = {0};
-double imuYaw[imuQueLength] = {0};
+double imuTime[imuQueLength] = { 0 };
+double imuRoll[imuQueLength] = { 0 };
+double imuPitch[imuQueLength] = { 0 };
+double imuYaw[imuQueLength] = { 0 };
 
-ros::Publisher *voDataPubPointer = NULL;
-tf::TransformBroadcaster *tfBroadcasterPointer = NULL;
-ros::Publisher *depthPointsPubPointer = NULL;
-ros::Publisher *imagePointsProjPubPointer = NULL;
-ros::Publisher *imageShowPubPointer;
+ros::Publisher* voDataPubPointer = NULL;
+tf::TransformBroadcaster* tfBroadcasterPointer = NULL;
+ros::Publisher* depthPointsPubPointer = NULL;
+ros::Publisher* imagePointsProjPubPointer = NULL;
+ros::Publisher* imageShowPubPointer;
 
 const int showDSRate = 2;
 
-void accumulateRotation(double cx, double cy, double cz, double lx, double ly, double lz, 
-                        double &ox, double &oy, double &oz)
+void accumulateRotation(double cx, double cy, double cz, double lx, double ly,
+                        double lz, double& ox, double& oy, double& oz)
 {
-  double srx = cos(lx)*cos(cx)*sin(ly)*sin(cz) - cos(cx)*cos(cz)*sin(lx) - cos(lx)*cos(ly)*sin(cx);
+  double srx = cos(lx) * cos(cx) * sin(ly) * sin(cz) -
+               cos(cx) * cos(cz) * sin(lx) - cos(lx) * cos(ly) * sin(cx);
   ox = -asin(srx);
 
-  double srycrx = sin(lx)*(cos(cy)*sin(cz) - cos(cz)*sin(cx)*sin(cy)) + cos(lx)*sin(ly)*(cos(cy)*cos(cz) 
-                + sin(cx)*sin(cy)*sin(cz)) + cos(lx)*cos(ly)*cos(cx)*sin(cy);
-  double crycrx = cos(lx)*cos(ly)*cos(cx)*cos(cy) - cos(lx)*sin(ly)*(cos(cz)*sin(cy) 
-                - cos(cy)*sin(cx)*sin(cz)) - sin(lx)*(sin(cy)*sin(cz) + cos(cy)*cos(cz)*sin(cx));
+  double srycrx =
+      sin(lx) * (cos(cy) * sin(cz) - cos(cz) * sin(cx) * sin(cy)) +
+      cos(lx) * sin(ly) * (cos(cy) * cos(cz) + sin(cx) * sin(cy) * sin(cz)) +
+      cos(lx) * cos(ly) * cos(cx) * sin(cy);
+  double crycrx =
+      cos(lx) * cos(ly) * cos(cx) * cos(cy) -
+      cos(lx) * sin(ly) * (cos(cz) * sin(cy) - cos(cy) * sin(cx) * sin(cz)) -
+      sin(lx) * (sin(cy) * sin(cz) + cos(cy) * cos(cz) * sin(cx));
   oy = atan2(srycrx / cos(ox), crycrx / cos(ox));
 
-  double srzcrx = sin(cx)*(cos(lz)*sin(ly) - cos(ly)*sin(lx)*sin(lz)) + cos(cx)*sin(cz)*(cos(ly)*cos(lz) 
-                + sin(lx)*sin(ly)*sin(lz)) + cos(lx)*cos(cx)*cos(cz)*sin(lz);
-  double crzcrx = cos(lx)*cos(lz)*cos(cx)*cos(cz) - cos(cx)*sin(cz)*(cos(ly)*sin(lz) 
-                - cos(lz)*sin(lx)*sin(ly)) - sin(cx)*(sin(ly)*sin(lz) + cos(ly)*cos(lz)*sin(lx));
+  double srzcrx =
+      sin(cx) * (cos(lz) * sin(ly) - cos(ly) * sin(lx) * sin(lz)) +
+      cos(cx) * sin(cz) * (cos(ly) * cos(lz) + sin(lx) * sin(ly) * sin(lz)) +
+      cos(lx) * cos(cx) * cos(cz) * sin(lz);
+  double crzcrx =
+      cos(lx) * cos(lz) * cos(cx) * cos(cz) -
+      cos(cx) * sin(cz) * (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly)) -
+      sin(cx) * (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx));
   oz = atan2(srzcrx / cos(ox), crzcrx / cos(ox));
 }
 
-void diffRotation(double cx, double cy, double cz, double lx, double ly, double lz, 
-                  double &ox, double &oy, double &oz)
+void diffRotation(double cx, double cy, double cz, double lx, double ly,
+                  double lz, double& ox, double& oy, double& oz)
 {
-  double srx = cos(cx)*cos(cy)*(sin(ly)*sin(lz) + cos(ly)*cos(lz)*sin(lx)) 
-             - cos(cx)*sin(cy)*(cos(ly)*sin(lz) - cos(lz)*sin(lx)*sin(ly)) - cos(lx)*cos(lz)*sin(cx);
+  double srx =
+      cos(cx) * cos(cy) * (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) -
+      cos(cx) * sin(cy) * (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly)) -
+      cos(lx) * cos(lz) * sin(cx);
   ox = -asin(srx);
 
-  double srycrx = cos(cx)*sin(cy)*(cos(ly)*cos(lz) + sin(lx)*sin(ly)*sin(lz)) 
-                - cos(cx)*cos(cy)*(cos(lz)*sin(ly) - cos(ly)*sin(lx)*sin(lz)) - cos(lx)*sin(cx)*sin(lz);
-  double crycrx = sin(cx)*sin(lx) + cos(cx)*cos(cy)*cos(lx)*cos(ly) + cos(cx)*cos(lx)*sin(cy)*sin(ly);
+  double srycrx =
+      cos(cx) * sin(cy) * (cos(ly) * cos(lz) + sin(lx) * sin(ly) * sin(lz)) -
+      cos(cx) * cos(cy) * (cos(lz) * sin(ly) - cos(ly) * sin(lx) * sin(lz)) -
+      cos(lx) * sin(cx) * sin(lz);
+  double crycrx = sin(cx) * sin(lx) + cos(cx) * cos(cy) * cos(lx) * cos(ly) +
+                  cos(cx) * cos(lx) * sin(cy) * sin(ly);
   oy = atan2(srycrx / cos(ox), crycrx / cos(ox));
 
-  double srzcrx = cos(cx)*cos(lx)*cos(lz)*sin(cz) - (cos(cz)*sin(cy) 
-                - cos(cy)*sin(cx)*sin(cz))*(sin(ly)*sin(lz) + cos(ly)*cos(lz)*sin(lx)) 
-                - (cos(cy)*cos(cz) + sin(cx)*sin(cy)*sin(cz))*(cos(ly)*sin(lz) - cos(lz)*sin(lx)*sin(ly));
-  double crzcrx = (sin(cy)*sin(cz) + cos(cy)*cos(cz)*sin(cx))*(sin(ly)*sin(lz) 
-                + cos(ly)*cos(lz)*sin(lx)) + (cos(cy)*sin(cz) - cos(cz)*sin(cx)*sin(cy))*(cos(ly)*sin(lz) 
-                - cos(lz)*sin(lx)*sin(ly)) + cos(cx)*cos(cz)*cos(lx)*cos(lz);
+  double srzcrx = cos(cx) * cos(lx) * cos(lz) * sin(cz) -
+                  (cos(cz) * sin(cy) - cos(cy) * sin(cx) * sin(cz)) *
+                      (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) -
+                  (cos(cy) * cos(cz) + sin(cx) * sin(cy) * sin(cz)) *
+                      (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly));
+  double crzcrx = (sin(cy) * sin(cz) + cos(cy) * cos(cz) * sin(cx)) *
+                      (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) +
+                  (cos(cy) * sin(cz) - cos(cz) * sin(cx) * sin(cy)) *
+                      (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly)) +
+                  cos(cx) * cos(cz) * cos(lx) * cos(lz);
   oz = atan2(srzcrx / cos(ox), crzcrx / cos(ox));
 }
 
@@ -126,41 +158,58 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   imuPitchLast = imuPitchCur;
   imuYawLast = imuYawCur;
 
-  double transform[6] = {0};
-  if (imuPointerLast >= 0) {
-    while (imuPointerFront != imuPointerLast) {
-      if (imagePointsCurTime < imuTime[imuPointerFront]) {
+  double transform[6] = { 0 };
+  if (imuPointerLast >= 0)
+  {
+    while (imuPointerFront != imuPointerLast)
+    {
+      if (imagePointsCurTime < imuTime[imuPointerFront])
+      {
         break;
       }
       imuPointerFront = (imuPointerFront + 1) % imuQueLength;
     }
 
-    if (imagePointsCurTime > imuTime[imuPointerFront]) {
+    if (imagePointsCurTime > imuTime[imuPointerFront])
+    {
       imuRollCur = imuRoll[imuPointerFront];
       imuPitchCur = imuPitch[imuPointerFront];
       imuYawCur = imuYaw[imuPointerFront];
-    } else {
+    }
+    else
+    {
       int imuPointerBack = (imuPointerFront + imuQueLength - 1) % imuQueLength;
-      double ratioFront = (imagePointsCurTime - imuTime[imuPointerBack]) 
-                        / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);
-      double ratioBack = (imuTime[imuPointerFront] - imagePointsCurTime) 
-                       / (imuTime[imuPointerFront] - imuTime[imuPointerBack]);
+      double ratioFront = (imagePointsCurTime - imuTime[imuPointerBack]) /
+                          (imuTime[imuPointerFront] - imuTime[imuPointerBack]);
+      double ratioBack = (imuTime[imuPointerFront] - imagePointsCurTime) /
+                         (imuTime[imuPointerFront] - imuTime[imuPointerBack]);
 
-      imuRollCur = imuRoll[imuPointerFront] * ratioFront + imuRoll[imuPointerBack] * ratioBack;
-      imuPitchCur = imuPitch[imuPointerFront] * ratioFront + imuPitch[imuPointerBack] * ratioBack;
-      if (imuYaw[imuPointerFront] - imuYaw[imuPointerBack] > PI) {
-        imuYawCur = imuYaw[imuPointerFront] * ratioFront + (imuYaw[imuPointerBack] + 2 * PI) * ratioBack;
-      } else if (imuYaw[imuPointerFront] - imuYaw[imuPointerBack] < -PI) {
-        imuYawCur = imuYaw[imuPointerFront] * ratioFront + (imuYaw[imuPointerBack] - 2 * PI) * ratioBack;
-      } else {
-        imuYawCur = imuYaw[imuPointerFront] * ratioFront + imuYaw[imuPointerBack] * ratioBack;
+      imuRollCur = imuRoll[imuPointerFront] * ratioFront +
+                   imuRoll[imuPointerBack] * ratioBack;
+      imuPitchCur = imuPitch[imuPointerFront] * ratioFront +
+                    imuPitch[imuPointerBack] * ratioBack;
+      if (imuYaw[imuPointerFront] - imuYaw[imuPointerBack] > PI)
+      {
+        imuYawCur = imuYaw[imuPointerFront] * ratioFront +
+                    (imuYaw[imuPointerBack] + 2 * PI) * ratioBack;
+      }
+      else if (imuYaw[imuPointerFront] - imuYaw[imuPointerBack] < -PI)
+      {
+        imuYawCur = imuYaw[imuPointerFront] * ratioFront +
+                    (imuYaw[imuPointerBack] - 2 * PI) * ratioBack;
+      }
+      else
+      {
+        imuYawCur = imuYaw[imuPointerFront] * ratioFront +
+                    imuYaw[imuPointerBack] * ratioBack;
       }
     }
 
-    if (imuInited) {
-      //transform[0] -= imuPitchCur - imuPitchLast;
-      //transform[1] -= imuYawCur - imuYawLast;
-      //transform[2] -= imuRollCur - imuRollLast;
+    if (imuInited)
+    {
+      // transform[0] -= imuPitchCur - imuPitchLast;
+      // transform[1] -= imuYawCur - imuYawLast;
+      // transform[2] -= imuRollCur - imuRollLast;
     }
   }
 
@@ -191,18 +240,23 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   pcl::PointXYZHSV ipr;
   ipRelations->clear();
   ipInd.clear();
-  for (int i = 0; i < imagePointsLastNum; i++) {
+  for (int i = 0; i < imagePointsLastNum; i++)
+  {
     bool ipFound = false;
-    for (; j < imagePointsCurNum; j++) {
-      if (imagePointsCur->points[j].ind == imagePointsLast->points[i].ind) {
+    for (; j < imagePointsCurNum; j++)
+    {
+      if (imagePointsCur->points[j].ind == imagePointsLast->points[i].ind)
+      {
         ipFound = true;
       }
-      if (imagePointsCur->points[j].ind >= imagePointsLast->points[i].ind) {
+      if (imagePointsCur->points[j].ind >= imagePointsLast->points[i].ind)
+      {
         break;
       }
     }
 
-    if (ipFound) {
+    if (ipFound)
+    {
       ipr.x = imagePointsLast->points[i].u;
       ipr.y = imagePointsLast->points[i].v;
       ipr.z = imagePointsCur->points[j].u;
@@ -211,12 +265,14 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
       ips.x = 10 * ipr.x;
       ips.y = 10 * ipr.y;
       ips.z = 10;
-      
-      if (depthCloudNum > 10) {
+
+      if (depthCloudNum > 10)
+      {
         kdTree->nearestKSearch(ips, 3, pointSearchInd, pointSearchSqrDis);
 
         double minDepth, maxDepth;
-        if (pointSearchSqrDis[0] < 0.5 && pointSearchInd.size() == 3) {
+        if (pointSearchSqrDis[0] < 0.5 && pointSearchInd.size() == 3)
+        {
           pcl::PointXYZI depthPoint = depthCloud->points[pointSearchInd[0]];
           double x1 = depthPoint.x * depthPoint.intensity / 10;
           double y1 = depthPoint.y * depthPoint.intensity / 10;
@@ -228,48 +284,60 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
           double x2 = depthPoint.x * depthPoint.intensity / 10;
           double y2 = depthPoint.y * depthPoint.intensity / 10;
           double z2 = depthPoint.intensity;
-          minDepth = (z2 < minDepth)? z2 : minDepth;
-          maxDepth = (z2 > maxDepth)? z2 : maxDepth;
+          minDepth = (z2 < minDepth) ? z2 : minDepth;
+          maxDepth = (z2 > maxDepth) ? z2 : maxDepth;
 
           depthPoint = depthCloud->points[pointSearchInd[2]];
           double x3 = depthPoint.x * depthPoint.intensity / 10;
           double y3 = depthPoint.y * depthPoint.intensity / 10;
           double z3 = depthPoint.intensity;
-          minDepth = (z3 < minDepth)? z3 : minDepth;
-          maxDepth = (z3 > maxDepth)? z3 : maxDepth;
+          minDepth = (z3 < minDepth) ? z3 : minDepth;
+          maxDepth = (z3 > maxDepth) ? z3 : maxDepth;
 
           double u = ipr.x;
           double v = ipr.y;
-          ipr.s = (x1*y2*z3 - x1*y3*z2 - x2*y1*z3 + x2*y3*z1 + x3*y1*z2 - x3*y2*z1) 
-                / (x1*y2 - x2*y1 - x1*y3 + x3*y1 + x2*y3 - x3*y2 + u*y1*z2 - u*y2*z1
-                - v*x1*z2 + v*x2*z1 - u*y1*z3 + u*y3*z1 + v*x1*z3 - v*x3*z1 + u*y2*z3 
-                - u*y3*z2 - v*x2*z3 + v*x3*z2);
+          ipr.s = (x1 * y2 * z3 - x1 * y3 * z2 - x2 * y1 * z3 + x2 * y3 * z1 +
+                   x3 * y1 * z2 - x3 * y2 * z1) /
+                  (x1 * y2 - x2 * y1 - x1 * y3 + x3 * y1 + x2 * y3 - x3 * y2 +
+                   u * y1 * z2 - u * y2 * z1 - v * x1 * z2 + v * x2 * z1 -
+                   u * y1 * z3 + u * y3 * z1 + v * x1 * z3 - v * x3 * z1 +
+                   u * y2 * z3 - u * y3 * z2 - v * x2 * z3 + v * x3 * z2);
           ipr.v = 1;
 
-          if (maxDepth - minDepth > 2) {
+          if (maxDepth - minDepth > 2)
+          {
             ipr.s = 0;
             ipr.v = 0;
-          } else if (ipr.s - maxDepth > 0.2) {
+          }
+          else if (ipr.s - maxDepth > 0.2)
+          {
             ipr.s = maxDepth;
-          } else if (ipr.s - minDepth < -0.2) {
+          }
+          else if (ipr.s - minDepth < -0.2)
+          {
             ipr.s = minDepth;
           }
-        } else {
+        }
+        else
+        {
           ipr.s = 0;
           ipr.v = 0;
         }
-      } else {
+      }
+      else
+      {
         ipr.s = 0;
         ipr.v = 0;
       }
 
-      if (fabs(ipr.v) < 0.5) {
+      if (fabs(ipr.v) < 0.5)
+      {
         double disX = transformSum[3] - startTransLast->points[i].h;
         double disY = transformSum[4] - startTransLast->points[i].s;
         double disZ = transformSum[5] - startTransLast->points[i].v;
 
-        if (sqrt(disX * disX + disY * disY + disZ * disZ) > 1) {
-
+        if (sqrt(disX * disX + disY * disY + disZ * disZ) > 1)
+        {
           double u0 = startPointsLast->points[i].u;
           double v0 = startPointsLast->points[i].v;
           double u1 = ipr.x;
@@ -336,22 +404,31 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
           double ty = srz1 * x2 + crz1 * y2;
           double tz = z2;
 
-          double delta = sqrt((v0 - v1) * (v0 - v1) + (u0 - u1) * (u0 - u1))
-                       * cos(atan2(tz * v1 - ty, tz * u1 - tx) - atan2(v0 - v1, u0 - u1));
-          double depth = sqrt((tz * u0 - tx) * (tz * u0 - tx) + (tz * v0 - ty) * (tz * v0 - ty)) / delta;
+          double delta =
+              sqrt((v0 - v1) * (v0 - v1) + (u0 - u1) * (u0 - u1)) *
+              cos(atan2(tz * v1 - ty, tz * u1 - tx) - atan2(v0 - v1, u0 - u1));
+          double depth = sqrt((tz * u0 - tx) * (tz * u0 - tx) +
+                              (tz * v0 - ty) * (tz * v0 - ty)) /
+                         delta;
 
-          if (depth > 0.5 && depth < 100) {
+          if (depth > 0.5 && depth < 100)
+          {
             ipr.s = depth;
             ipr.v = 2;
           }
         }
 
-        if (ipr.v == 2) {
-          if ((*ipDepthLast)[i] > 0) {
-            ipr.s = 3 * ipr.s * (*ipDepthLast)[i] / (ipr.s + 2 * (*ipDepthLast)[i]);
+        if (ipr.v == 2)
+        {
+          if ((*ipDepthLast)[i] > 0)
+          {
+            ipr.s =
+                3 * ipr.s * (*ipDepthLast)[i] / (ipr.s + 2 * (*ipDepthLast)[i]);
           }
           (*ipDepthLast)[i] = ipr.s;
-        } else if ((*ipDepthLast)[i] > 0) {
+        }
+        else if ((*ipDepthLast)[i] > 0)
+        {
           ipr.s = (*ipDepthLast)[i];
           ipr.v = 2;
         }
@@ -368,14 +445,16 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   int ptNumNoDepthRec = 0;
   int ptNumWithDepthRec = 0;
   double meanValueWithDepthRec = 100000;
-  for (int iterCount = 0; iterCount < iterNum; iterCount++) {
+  for (int iterCount = 0; iterCount < iterNum; iterCount++)
+  {
     ipRelations2->clear();
     ipy2.clear();
     int ptNumNoDepth = 0;
     int ptNumWithDepth = 0;
     double meanValueNoDepth = 0;
     double meanValueWithDepth = 0;
-    for (int i = 0; i < ipRelationsNum; i++) {
+    for (int i = 0; i < ipRelationsNum; i++)
+    {
       ipr = ipRelations->points[i];
 
       double u0 = ipr.x;
@@ -393,35 +472,57 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
       double ty = transform[4];
       double tz = transform[5];
 
-      if (fabs(ipr.v) < 0.5) {
+      if (fabs(ipr.v) < 0.5)
+      {
+        ipr2.x = v0 * (crz * srx * (tx - tz * u1) - crx * (ty * u1 - tx * v1) +
+                       srz * srx * (ty - tz * v1)) -
+                 u0 * (sry * srx * (ty * u1 - tx * v1) +
+                       crz * sry * crx * (tx - tz * u1) +
+                       sry * srz * crx * (ty - tz * v1)) +
+                 cry * srx * (ty * u1 - tx * v1) +
+                 cry * crz * crx * (tx - tz * u1) +
+                 cry * srz * crx * (ty - tz * v1);
 
-        ipr2.x = v0*(crz*srx*(tx - tz*u1) - crx*(ty*u1 - tx*v1) + srz*srx*(ty - tz*v1)) 
-               - u0*(sry*srx*(ty*u1 - tx*v1) + crz*sry*crx*(tx - tz*u1) + sry*srz*crx*(ty - tz*v1)) 
-               + cry*srx*(ty*u1 - tx*v1) + cry*crz*crx*(tx - tz*u1) + cry*srz*crx*(ty - tz*v1);
+        ipr2.y = u0 * ((tx - tz * u1) * (srz * sry - crz * srx * cry) -
+                       (ty - tz * v1) * (crz * sry + srx * srz * cry) +
+                       crx * cry * (ty * u1 - tx * v1)) -
+                 (tx - tz * u1) * (srz * cry + crz * srx * sry) +
+                 (ty - tz * v1) * (crz * cry - srx * srz * sry) +
+                 crx * sry * (ty * u1 - tx * v1);
 
-        ipr2.y = u0*((tx - tz*u1)*(srz*sry - crz*srx*cry) - (ty - tz*v1)*(crz*sry + srx*srz*cry) 
-               + crx*cry*(ty*u1 - tx*v1)) - (tx - tz*u1)*(srz*cry + crz*srx*sry) 
-               + (ty - tz*v1)*(crz*cry - srx*srz*sry) + crx*sry*(ty*u1 - tx*v1);
+        ipr2.z = -u0 * ((tx - tz * u1) * (cry * crz - srx * sry * srz) +
+                        (ty - tz * v1) * (cry * srz + srx * sry * crz)) -
+                 (tx - tz * u1) * (sry * crz + cry * srx * srz) -
+                 (ty - tz * v1) * (sry * srz - cry * srx * crz) -
+                 v0 * (crx * crz * (ty - tz * v1) - crx * srz * (tx - tz * u1));
 
-        ipr2.z = -u0*((tx - tz*u1)*(cry*crz - srx*sry*srz) + (ty - tz*v1)*(cry*srz + srx*sry*crz)) 
-               - (tx - tz*u1)*(sry*crz + cry*srx*srz) - (ty - tz*v1)*(sry*srz - cry*srx*crz) 
-               - v0*(crx*crz*(ty - tz*v1) - crx*srz*(tx - tz*u1));
+        ipr2.h = cry * crz * srx - v0 * (crx * crz - srx * v1) -
+                 u0 * (cry * srz + crz * srx * sry + crx * sry * v1) -
+                 sry * srz + crx * cry * v1;
 
-        ipr2.h = cry*crz*srx - v0*(crx*crz - srx*v1) - u0*(cry*srz + crz*srx*sry + crx*sry*v1) 
-               - sry*srz + crx*cry*v1;
+        ipr2.s = crz * sry - v0 * (crx * srz + srx * u1) +
+                 u0 * (cry * crz + crx * sry * u1 - srx * sry * srz) -
+                 crx * cry * u1 + cry * srx * srz;
 
-        ipr2.s = crz*sry - v0*(crx*srz + srx*u1) + u0*(cry*crz + crx*sry*u1 - srx*sry*srz) 
-               - crx*cry*u1 + cry*srx*srz;
+        ipr2.v = u1 * (sry * srz - cry * crz * srx) -
+                 v1 * (crz * sry + cry * srx * srz) +
+                 u0 * (u1 * (cry * srz + crz * srx * sry) -
+                       v1 * (cry * crz - srx * sry * srz)) +
+                 v0 * (crx * crz * u1 + crx * srz * v1);
 
-        ipr2.v = u1*(sry*srz - cry*crz*srx) - v1*(crz*sry + cry*srx*srz) + u0*(u1*(cry*srz + crz*srx*sry) 
-               - v1*(cry*crz - srx*sry*srz)) + v0*(crx*crz*u1 + crx*srz*v1);
+        double y2 =
+            (ty - tz * v1) * (crz * sry + cry * srx * srz) -
+            (tx - tz * u1) * (sry * srz - cry * crz * srx) -
+            v0 * (srx * (ty * u1 - tx * v1) + crx * crz * (tx - tz * u1) +
+                  crx * srz * (ty - tz * v1)) +
+            u0 * ((ty - tz * v1) * (cry * crz - srx * sry * srz) -
+                  (tx - tz * u1) * (cry * srz + crz * srx * sry) +
+                  crx * sry * (ty * u1 - tx * v1)) -
+            crx * cry * (ty * u1 - tx * v1);
 
-        double y2 = (ty - tz*v1)*(crz*sry + cry*srx*srz) - (tx - tz*u1)*(sry*srz - cry*crz*srx) 
-                  - v0*(srx*(ty*u1 - tx*v1) + crx*crz*(tx - tz*u1) + crx*srz*(ty - tz*v1)) 
-                  + u0*((ty - tz*v1)*(cry*crz - srx*sry*srz) - (tx - tz*u1)*(cry*srz + crz*srx*sry) 
-                  + crx*sry*(ty*u1 - tx*v1)) - crx*cry*(ty*u1 - tx*v1);
-
-        if (ptNumNoDepthRec < 50 || iterCount < 25 || fabs(y2) < 2 * meanValueWithDepthRec / 10000) {
+        if (ptNumNoDepthRec < 50 || iterCount < 25 ||
+            fabs(y2) < 2 * meanValueWithDepthRec / 10000)
+        {
           double scale = 100;
           ipr2.x *= scale;
           ipr2.y *= scale;
@@ -435,19 +536,25 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
           ipy2.push_back(y2);
 
           ptNumNoDepth++;
-        } else {
+        }
+        else
+        {
           ipRelations->points[i].v = -1;
         }
-      } else if (fabs(ipr.v - 1) < 0.5 || fabs(ipr.v - 2) < 0.5) {
-
+      }
+      else if (fabs(ipr.v - 1) < 0.5 || fabs(ipr.v - 2) < 0.5)
+      {
         double d0 = ipr.s;
 
-        ipr3.x = d0*(cry*srz*crx + cry*u1*srx) - d0*u0*(sry*srz*crx + sry*u1*srx) 
-               - d0*v0*(u1*crx - srz*srx);
+        ipr3.x = d0 * (cry * srz * crx + cry * u1 * srx) -
+                 d0 * u0 * (sry * srz * crx + sry * u1 * srx) -
+                 d0 * v0 * (u1 * crx - srz * srx);
 
-        ipr3.y = d0*(crz*cry + crx*u1*sry - srx*srz*sry) - d0*u0*(crz*sry - crx*u1*cry + srx*srz*cry);
+        ipr3.y = d0 * (crz * cry + crx * u1 * sry - srx * srz * sry) -
+                 d0 * u0 * (crz * sry - crx * u1 * cry + srx * srz * cry);
 
-        ipr3.z = -d0*(sry*srz - cry*srx*crz) - d0*u0*(cry*srz + srx*sry*crz) - crx*d0*v0*crz;
+        ipr3.z = -d0 * (sry * srz - cry * srx * crz) -
+                 d0 * u0 * (cry * srz + srx * sry * crz) - crx * d0 * v0 * crz;
 
         ipr3.h = 1;
 
@@ -455,15 +562,20 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
 
         ipr3.v = -u1;
 
-        double y3 = tx - tz*u1 + d0*(crz*sry - crx*cry*u1 + cry*srx*srz) - d0*v0*(crx*srz + srx*u1) 
-                  + d0*u0*(cry*crz + crx*sry*u1 - srx*sry*srz);
+        double y3 = tx - tz * u1 +
+                    d0 * (crz * sry - crx * cry * u1 + cry * srx * srz) -
+                    d0 * v0 * (crx * srz + srx * u1) +
+                    d0 * u0 * (cry * crz + crx * sry * u1 - srx * sry * srz);
 
-        ipr4.x = d0*(cry*v1*srx - cry*crz*crx) + d0*u0*(crz*sry*crx - sry*v1*srx) 
-               - d0*v0*(crz*srx + v1*crx);
+        ipr4.x = d0 * (cry * v1 * srx - cry * crz * crx) +
+                 d0 * u0 * (crz * sry * crx - sry * v1 * srx) -
+                 d0 * v0 * (crz * srx + v1 * crx);
 
-        ipr4.y = d0*(srz*cry + crz*srx*sry + crx*v1*sry) + d0*u0*(crz*srx*cry - srz*sry + crx*v1*cry);
+        ipr4.y = d0 * (srz * cry + crz * srx * sry + crx * v1 * sry) +
+                 d0 * u0 * (crz * srx * cry - srz * sry + crx * v1 * cry);
 
-        ipr4.z = d0*(sry*crz + cry*srx*srz) + d0*u0*(cry*crz - srx*sry*srz) - crx*d0*v0*srz;
+        ipr4.z = d0 * (sry * crz + cry * srx * srz) +
+                 d0 * u0 * (cry * crz - srx * sry * srz) - crx * d0 * v0 * srz;
 
         ipr4.h = 0;
 
@@ -471,11 +583,14 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
 
         ipr4.v = -v1;
 
-        double y4 = ty - tz*v1 - d0*(cry*crz*srx - sry*srz + crx*cry*v1) + d0*v0*(crx*crz - srx*v1) 
-                  + d0*u0*(cry*srz + crz*srx*sry + crx*sry*v1);
+        double y4 = ty - tz * v1 -
+                    d0 * (cry * crz * srx - sry * srz + crx * cry * v1) +
+                    d0 * v0 * (crx * crz - srx * v1) +
+                    d0 * u0 * (cry * srz + crz * srx * sry + crx * sry * v1);
 
-        if (ptNumWithDepthRec < 50 || iterCount < 25 || 
-            sqrt(y3 * y3 + y4 * y4) < 2 * meanValueWithDepthRec) {
+        if (ptNumWithDepthRec < 50 || iterCount < 25 ||
+            sqrt(y3 * y3 + y4 * y4) < 2 * meanValueWithDepthRec)
+        {
           ipRelations2->push_back(ipr3);
           ipy2.push_back(y3);
 
@@ -484,7 +599,9 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
 
           ptNumWithDepth++;
           meanValueWithDepth += sqrt(y3 * y3 + y4 * y4);
-        } else {
+        }
+        else
+        {
           ipRelations->points[i].v = -1;
         }
       }
@@ -495,7 +612,8 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
     meanValueWithDepthRec = meanValueWithDepth;
 
     int ipRelations2Num = ipRelations2->points.size();
-    if (ipRelations2Num > 10) {
+    if (ipRelations2Num > 10)
+    {
       cv::Mat matA(ipRelations2Num, 6, CV_32F, cv::Scalar::all(0));
       cv::Mat matAt(6, ipRelations2Num, CV_32F, cv::Scalar::all(0));
       cv::Mat matAtA(6, 6, CV_32F, cv::Scalar::all(0));
@@ -503,7 +621,8 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
       cv::Mat matAtB(6, 1, CV_32F, cv::Scalar::all(0));
       cv::Mat matX(6, 1, CV_32F, cv::Scalar::all(0));
 
-      for (int i = 0; i < ipRelations2Num; i++) {
+      for (int i = 0; i < ipRelations2Num; i++)
+      {
         ipr2 = ipRelations2->points[i];
 
         matA.at<float>(i, 0) = ipr2.x;
@@ -519,32 +638,38 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
       matAtB = matAt * matB;
       cv::solve(matAtA, matAtB, matX, cv::DECOMP_QR);
 
-      //if (fabs(matX.at<float>(0, 0)) < 0.1 && fabs(matX.at<float>(1, 0)) < 0.1 && 
+      // if (fabs(matX.at<float>(0, 0)) < 0.1 && fabs(matX.at<float>(1, 0)) <
+      // 0.1 &&
       //    fabs(matX.at<float>(2, 0)) < 0.1) {
-        transform[0] += matX.at<float>(0, 0);
-        transform[1] += matX.at<float>(1, 0);
-        transform[2] += matX.at<float>(2, 0);
-        transform[3] += matX.at<float>(3, 0);
-        transform[4] += matX.at<float>(4, 0);
-        transform[5] += matX.at<float>(5, 0);
+      transform[0] += matX.at<float>(0, 0);
+      transform[1] += matX.at<float>(1, 0);
+      transform[2] += matX.at<float>(2, 0);
+      transform[3] += matX.at<float>(3, 0);
+      transform[4] += matX.at<float>(4, 0);
+      transform[5] += matX.at<float>(5, 0);
       //}
 
-      float deltaR = sqrt(matX.at<float>(0, 0) * 180 / PI * matX.at<float>(0, 0) * 180 / PI
-                   + matX.at<float>(1, 0) * 180 / PI * matX.at<float>(1, 0) * 180 / PI
-                   + matX.at<float>(2, 0) * 180 / PI * matX.at<float>(2, 0) * 180 / PI);
-      float deltaT = sqrt(matX.at<float>(3, 0) * 100 * matX.at<float>(3, 0) * 100
-                   + matX.at<float>(4, 0) * 100 * matX.at<float>(4, 0) * 100
-                   + matX.at<float>(5, 0) * 100 * matX.at<float>(5, 0) * 100);
+      float deltaR = sqrt(
+          matX.at<float>(0, 0) * 180 / PI * matX.at<float>(0, 0) * 180 / PI +
+          matX.at<float>(1, 0) * 180 / PI * matX.at<float>(1, 0) * 180 / PI +
+          matX.at<float>(2, 0) * 180 / PI * matX.at<float>(2, 0) * 180 / PI);
+      float deltaT =
+          sqrt(matX.at<float>(3, 0) * 100 * matX.at<float>(3, 0) * 100 +
+               matX.at<float>(4, 0) * 100 * matX.at<float>(4, 0) * 100 +
+               matX.at<float>(5, 0) * 100 * matX.at<float>(5, 0) * 100);
 
-      if (deltaR < 0.00001 && deltaT < 0.00001) {
+      if (deltaR < 0.00001 && deltaT < 0.00001)
+      {
         break;
       }
 
-      //ROS_INFO ("iter: %d, deltaR: %f, deltaT: %f", iterCount, deltaR, deltaT);
+      // ROS_INFO ("iter: %d, deltaR: %f, deltaT: %f", iterCount, deltaR,
+      // deltaT);
     }
   }
 
-  if (!imuInited) {
+  if (!imuInited)
+  {
     imuYawInit = imuYawCur;
     transform[0] -= imuPitchCur;
     transform[2] -= imuRollCur;
@@ -553,12 +678,14 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   }
 
   double rx, ry, rz;
-  accumulateRotation(transformSum[0], transformSum[1], transformSum[2], 
-                    -transform[0], -transform[1], -transform[2], rx, ry, rz);
+  accumulateRotation(transformSum[0], transformSum[1], transformSum[2],
+                     -transform[0], -transform[1], -transform[2], rx, ry, rz);
 
-  if (imuPointerLast >= 0) {
+  if (imuPointerLast >= 0)
+  {
     double drx, dry, drz;
-    diffRotation(imuPitchCur, imuYawCur - imuYawInit, imuRollCur, rx, ry, rz, drx, dry, drz);
+    diffRotation(imuPitchCur, imuYawCur - imuYawInit, imuRollCur, rx, ry, rz,
+                 drx, dry, drz);
 
     transform[0] -= 0.1 * drx;
     /*if (dry > PI) {
@@ -570,8 +697,8 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
     }*/
     transform[2] -= 0.1 * drz;
 
-    accumulateRotation(transformSum[0], transformSum[1], transformSum[2], 
-                      -transform[0], -transform[1], -transform[2], rx, ry, rz);
+    accumulateRotation(transformSum[0], transformSum[1], transformSum[2],
+                       -transform[0], -transform[1], -transform[2], rx, ry, rz);
   }
 
   double x1 = cos(rz) * transform[3] - sin(rz) * transform[4];
@@ -607,22 +734,28 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   double sry = sin(transform[1]);
 
   j = 0;
-  for (int i = 0; i < imagePointsCurNum; i++) {
+  for (int i = 0; i < imagePointsCurNum; i++)
+  {
     bool ipFound = false;
-    for (; j < imagePointsLastNum; j++) {
-      if (imagePointsLast->points[j].ind == imagePointsCur->points[i].ind) {
+    for (; j < imagePointsLastNum; j++)
+    {
+      if (imagePointsLast->points[j].ind == imagePointsCur->points[i].ind)
+      {
         ipFound = true;
       }
-      if (imagePointsLast->points[j].ind >= imagePointsCur->points[i].ind) {
+      if (imagePointsLast->points[j].ind >= imagePointsCur->points[i].ind)
+      {
         break;
       }
     }
 
-    if (ipFound) {
+    if (ipFound)
+    {
       startPointsCur->push_back(startPointsLast->points[j]);
       startTransCur->push_back(startTransLast->points[j]);
 
-      if ((*ipDepthLast)[j] > 0) {
+      if ((*ipDepthLast)[j] > 0)
+      {
         double ipz = (*ipDepthLast)[j];
         double ipx = imagePointsLast->points[j].u * ipz;
         double ipy = imagePointsLast->points[j].v * ipz;
@@ -636,10 +769,14 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
         z2 = srx * y1 + crx * z1;
 
         ipDepthCur->push_back(z2 + transform[5]);
-      } else {
+      }
+      else
+      {
         ipDepthCur->push_back(-1);
       }
-    } else {
+    }
+    else
+    {
       startPointsCur->push_back(imagePointsCur->points[i]);
       startTransCur->push_back(spc);
       ipDepthCur->push_back(-1);
@@ -653,7 +790,8 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   angleSum[1] -= transform[1];
   angleSum[2] -= transform[2];
 
-  geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw(rz, -rx, -ry);
+  geometry_msgs::Quaternion geoQuat =
+      tf::createQuaternionMsgFromRollPitchYaw(rz, -rx, -ry);
 
   nav_msgs::Odometry voData;
   voData.header.frame_id = "/camera_init";
@@ -675,7 +813,8 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   voTrans.frame_id_ = "/camera_init";
   voTrans.child_frame_id_ = "/camera";
   voTrans.stamp_ = imagePoints2->header.stamp;
-  voTrans.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
+  voTrans.setRotation(
+      tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
   voTrans.setOrigin(tf::Vector3(tx, ty, tz));
   tfBroadcasterPointer->sendTransform(voTrans);
 
@@ -705,9 +844,11 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
   pcl::PointXYZ ipp;
   depthPointsSend->clear();
   imagePointsProj->clear();
-  for (int i = 0; i < ipRelationsNum; i++) {
-    if (fabs(ipRelations->points[i].v - 1) < 0.5 || fabs(ipRelations->points[i].v - 2) < 0.5) {
-
+  for (int i = 0; i < ipRelationsNum; i++)
+  {
+    if (fabs(ipRelations->points[i].v - 1) < 0.5 ||
+        fabs(ipRelations->points[i].v - 2) < 0.5)
+    {
       ipd.u = ipRelations->points[i].z;
       ipd.v = ipRelations->points[i].h;
       ipd.depth = ipRelations->points[i].s + transform[5];
@@ -717,10 +858,14 @@ void imagePointsHandler(const sensor_msgs::PointCloud2ConstPtr& imagePoints2)
       depthPointsCur->push_back(ipd);
       depthPointsCurNum++;
 
-      for (; j < depthPointsLastNum; j++) {
-        if (depthPointsLast->points[j].ind < ipInd[i]) {
+      for (; j < depthPointsLastNum; j++)
+      {
+        if (depthPointsLast->points[j].ind < ipInd[i])
+        {
           depthPointsSend->push_back(depthPointsLast->points[j]);
-        } else if (depthPointsLast->points[j].ind > ipInd[i]) {
+        }
+        else if (depthPointsLast->points[j].ind > ipInd[i])
+        {
           break;
         }
       }
@@ -760,8 +905,10 @@ void depthCloudHandler(const sensor_msgs::PointCloud2ConstPtr& depthCloud2)
   pcl::fromROSMsg(*depthCloud2, *depthCloud);
   depthCloudNum = depthCloud->points.size();
 
-  if (depthCloudNum > 10) {
-    for (int i = 0; i < depthCloudNum; i++) {
+  if (depthCloudNum > 10)
+  {
+    for (int i = 0; i < depthCloudNum; i++)
+    {
       depthCloud->points[i].intensity = depthCloud->points[i].z;
       depthCloud->points[i].x *= 10 / depthCloud->points[i].z;
       depthCloud->points[i].y *= 10 / depthCloud->points[i].z;
@@ -787,24 +934,43 @@ void imuDataHandler(const sensor_msgs::Imu::ConstPtr& imuData)
   imuYaw[imuPointerLast] = yaw;
 }
 
-void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData) 
+void imageDataHandler(const sensor_msgs::Image::ConstPtr& imageData)
 {
   cv_bridge::CvImagePtr bridge = cv_bridge::toCvCopy(imageData, "bgr8");
 
   int ipRelationsNum = ipRelations->points.size();
-  for (int i = 0; i < ipRelationsNum; i++) {
-    if (fabs(ipRelations->points[i].v) < 0.5) {
-      cv::circle(bridge->image, cv::Point((kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
-                (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate), 1, CV_RGB(255, 0, 0), 2);
-    } else if (fabs(ipRelations->points[i].v - 1) < 0.5) {
-      cv::circle(bridge->image, cv::Point((kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
-                (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate), 1, CV_RGB(0, 255, 0), 2);
-    } else if (fabs(ipRelations->points[i].v - 2) < 0.5) {
-      cv::circle(bridge->image, cv::Point((kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
-                (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate), 1, CV_RGB(0, 0, 255), 2);
+  for (int i = 0; i < ipRelationsNum; i++)
+  {
+    if (fabs(ipRelations->points[i].v) < 0.5)
+    {
+      cv::circle(
+          bridge->image,
+          cv::Point(
+              (kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
+              (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate),
+          1, CV_RGB(255, 0, 0), 2);
+    }
+    else if (fabs(ipRelations->points[i].v - 1) < 0.5)
+    {
+      cv::circle(
+          bridge->image,
+          cv::Point(
+              (kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
+              (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate),
+          1, CV_RGB(0, 255, 0), 2);
+    }
+    else if (fabs(ipRelations->points[i].v - 2) < 0.5)
+    {
+      cv::circle(
+          bridge->image,
+          cv::Point(
+              (kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
+              (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate),
+          1, CV_RGB(0, 0, 255), 2);
     } /*else {
-      cv::circle(bridge->image, cv::Point((kImage[2] - ipRelations->points[i].z * kImage[0]) / showDSRate,
-                (kImage[5] - ipRelations->points[i].h * kImage[4]) / showDSRate), 1, CV_RGB(0, 0, 0), 2);
+      cv::circle(bridge->image, cv::Point((kImage[2] - ipRelations->points[i].z
+    * kImage[0]) / showDSRate, (kImage[5] - ipRelations->points[i].h *
+    kImage[4]) / showDSRate), 1, CV_RGB(0, 0, 0), 2);
     }*/
   }
 
@@ -817,29 +983,35 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "visualOdometry");
   ros::NodeHandle nh;
 
-  ros::Subscriber imagePointsSub = nh.subscribe<sensor_msgs::PointCloud2>
-                                   ("/image_points_last", 5, imagePointsHandler);
+  ros::Subscriber imagePointsSub = nh.subscribe<sensor_msgs::PointCloud2>(
+      "/image_points_last", 5, imagePointsHandler);
 
-  ros::Subscriber depthCloudSub = nh.subscribe<sensor_msgs::PointCloud2> 
-                                  ("/depth_cloud", 5, depthCloudHandler);
+  ros::Subscriber depthCloudSub = nh.subscribe<sensor_msgs::PointCloud2>(
+      "/depth_cloud", 5, depthCloudHandler);
 
-  ros::Subscriber imuDataSub = nh.subscribe<sensor_msgs::Imu> ("/imu/data", 5, imuDataHandler);
+  ros::Subscriber imuDataSub =
+      nh.subscribe<sensor_msgs::Imu>("/imu/data", 5, imuDataHandler);
 
-  ros::Publisher voDataPub = nh.advertise<nav_msgs::Odometry> ("/cam_to_init", 5);
+  ros::Publisher voDataPub =
+      nh.advertise<nav_msgs::Odometry>("/cam_to_init", 5);
   voDataPubPointer = &voDataPub;
 
   tf::TransformBroadcaster tfBroadcaster;
   tfBroadcasterPointer = &tfBroadcaster;
 
-  ros::Publisher depthPointsPub = nh.advertise<sensor_msgs::PointCloud2> ("/depth_points_last", 5);
+  ros::Publisher depthPointsPub =
+      nh.advertise<sensor_msgs::PointCloud2>("/depth_points_last", 5);
   depthPointsPubPointer = &depthPointsPub;
 
-  ros::Publisher imagePointsProjPub = nh.advertise<sensor_msgs::PointCloud2> ("/image_points_proj", 1);
+  ros::Publisher imagePointsProjPub =
+      nh.advertise<sensor_msgs::PointCloud2>("/image_points_proj", 1);
   imagePointsProjPubPointer = &imagePointsProjPub;
 
-  ros::Subscriber imageDataSub = nh.subscribe<sensor_msgs::Image>("/image/show", 1, imageDataHandler);
+  ros::Subscriber imageDataSub =
+      nh.subscribe<sensor_msgs::Image>("/image/show", 1, imageDataHandler);
 
-  ros::Publisher imageShowPub = nh.advertise<sensor_msgs::Image>("/image/show_2", 1);
+  ros::Publisher imageShowPub =
+      nh.advertise<sensor_msgs::Image>("/image/show_2", 1);
   imageShowPubPointer = &imageShowPub;
 
   ros::spin();

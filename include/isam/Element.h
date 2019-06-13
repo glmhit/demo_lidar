@@ -30,30 +30,46 @@
 #include <list>
 #include <ostream>
 
-namespace isam {
-
-class Element {
-  Element(const Element& rhs); // not allowed
-  const Element& operator= (const Element& rhs); // not allowed
+namespace isam
+{
+class Element
+{
+  Element(const Element& rhs);                   // not allowed
+  const Element& operator=(const Element& rhs);  // not allowed
 
   const char* _name;
 
-  int _start; // needed for Slam::jacobian
+  int _start;  // needed for Slam::jacobian
 
 protected:
   int _id;
   int _dim;
 
 public:
-  Element(const char* name, int dim) : _name(name), _dim(dim) {}
-  virtual ~Element() {};
+  Element(const char* name, int dim) : _name(name), _dim(dim)
+  {
+  }
+  virtual ~Element(){};
 
-  virtual int unique_id() {return _id;}
-  virtual const char* name() const {return _name;}
-  inline int dim() const {return _dim;}
-  inline int start() const {return _start;}
+  virtual int unique_id()
+  {
+    return _id;
+  }
+  virtual const char* name() const
+  {
+    return _name;
+  }
+  inline int dim() const
+  {
+    return _dim;
+  }
+  inline int start() const
+  {
+    return _start;
+  }
 
-  virtual void write(std::ostream &out) const {
+  virtual void write(std::ostream& out) const
+  {
     out << name();
   }
 
@@ -61,4 +77,4 @@ public:
   friend class Covariances;
 };
 
-}
+}  // namespace isam

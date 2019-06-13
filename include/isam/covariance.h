@@ -29,7 +29,7 @@
 #pragma once
 
 #include <vector>
-#include <utility> // pair
+#include <utility>  // pair
 #include <list>
 #include <Eigen/Dense>
 
@@ -42,8 +42,8 @@
 
 #include "SparseMatrix.h"
 
-namespace isam {
-
+namespace isam
+{
 #ifdef USE_TR1
 #include <tr1/unordered_map>
 typedef std::tr1::unordered_map<int, double> umap;
@@ -51,52 +51,61 @@ typedef std::tr1::unordered_map<int, double> umap;
 typedef boost::unordered_map<int, double> umap;
 #endif
 
-class CovarianceCache {
+class CovarianceCache
+{
 public:
   umap entries;
   // precalculated diagonal inverses
   std::vector<double> diag;
   // recovering rows is expensive, buffer results
   std::vector<SparseVector> rows;
-  // avoid having to cleanup buffers each time by explicitly marking entries as valid
+  // avoid having to cleanup buffers each time by explicitly marking entries as
+  // valid
   std::vector<unsigned int> rows_valid;
   // avoid having to cleanup valid entries by using different indices each time
   unsigned int current_valid;
   // stats
   int num_calc;
 
-  CovarianceCache () {
+  CovarianceCache()
+  {
     current_valid = 1;
   }
 };
 
-typedef std::vector< std::vector<int> > index_lists_t;
-typedef std::vector< std::pair<int, int> > entry_list_t;
+typedef std::vector<std::vector<int> > index_lists_t;
+typedef std::vector<std::pair<int, int> > entry_list_t;
 
 /**
  * Takes a list of variable indices, and returns the marginal covariance matrix.
  * @param R Sparse factor matrix.
  * @param cache Covariance cache object.
- * @param index_lists List of lists of indices; a block will be recovered for each list.
+ * @param index_lists List of lists of indices; a block will be recovered for
+ * each list.
  * @param debug Optional parameter to print timing information.
- * @param step Optional parameter to print statistics (default=-1, no stats printed).
+ * @param step Optional parameter to print statistics (default=-1, no stats
+ * printed).
  * @return List of dense marginal covariance matrices.
  */
-std::list<Eigen::MatrixXd> cov_marginal(const SparseMatrix& R, CovarianceCache& cache,
+std::list<Eigen::MatrixXd> cov_marginal(const SparseMatrix& R,
+                                        CovarianceCache& cache,
                                         const index_lists_t& index_lists,
-                                        bool debug=false, int step=-1);
+                                        bool debug = false, int step = -1);
 
 /**
  * Takes a list of pairs of integers and returns the corresonding
  * entries of the covariance matrix.
  * @param R Sparse factor matrix.
  * @param cache Covariance cache object.
- * @param entry_lists List of pairs of integers refering to covariance matrix entries.
+ * @param entry_lists List of pairs of integers refering to covariance matrix
+ * entries.
  * @param debug Optional parameter to print timing information.
- * @param step Optional parameter to print statistics (default=-1, no stats printed).
- * @return List of doubles corresponding to the requested covariance matrix entries.
+ * @param step Optional parameter to print statistics (default=-1, no stats
+ * printed).
+ * @return List of doubles corresponding to the requested covariance matrix
+ * entries.
  */
 std::list<double> cov_marginal(const SparseMatrix& R, CovarianceCache& cache,
                                const entry_list_t& entry_list);
 
-}
+}  // namespace isam

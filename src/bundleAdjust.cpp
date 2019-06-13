@@ -24,7 +24,8 @@ const double PI = 3.1415926;
 
 const int keyframeNum = 5;
 pcl::PointCloud<DepthPoint>::Ptr depthPoints[keyframeNum];
-pcl::PointCloud<DepthPoint>::Ptr depthPointsStacked(new pcl::PointCloud<DepthPoint>());
+pcl::PointCloud<DepthPoint>::Ptr
+    depthPointsStacked(new pcl::PointCloud<DepthPoint>());
 
 double depthPointsTime;
 bool newKeyframe = false;
@@ -32,27 +33,36 @@ bool newKeyframe = false;
 double rollRec, pitchRec, yawRec;
 double txRec, tyRec, tzRec;
 
-double transformBefBA[6] = {0};
-double transformAftBA[6] = {0};
+double transformBefBA[6] = { 0 };
+double transformAftBA[6] = { 0 };
 
-void diffRotation(double cx, double cy, double cz, double lx, double ly, double lz, 
-                  double &ox, double &oy, double &oz)
+void diffRotation(double cx, double cy, double cz, double lx, double ly,
+                  double lz, double& ox, double& oy, double& oz)
 {
-  double srx = cos(cx)*cos(cy)*(sin(ly)*sin(lz) + cos(ly)*cos(lz)*sin(lx)) 
-             - cos(cx)*sin(cy)*(cos(ly)*sin(lz) - cos(lz)*sin(lx)*sin(ly)) - cos(lx)*cos(lz)*sin(cx);
+  double srx =
+      cos(cx) * cos(cy) * (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) -
+      cos(cx) * sin(cy) * (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly)) -
+      cos(lx) * cos(lz) * sin(cx);
   ox = -asin(srx);
 
-  double srycrx = cos(cx)*sin(cy)*(cos(ly)*cos(lz) + sin(lx)*sin(ly)*sin(lz)) 
-                - cos(cx)*cos(cy)*(cos(lz)*sin(ly) - cos(ly)*sin(lx)*sin(lz)) - cos(lx)*sin(cx)*sin(lz);
-  double crycrx = sin(cx)*sin(lx) + cos(cx)*cos(cy)*cos(lx)*cos(ly) + cos(cx)*cos(lx)*sin(cy)*sin(ly);
+  double srycrx =
+      cos(cx) * sin(cy) * (cos(ly) * cos(lz) + sin(lx) * sin(ly) * sin(lz)) -
+      cos(cx) * cos(cy) * (cos(lz) * sin(ly) - cos(ly) * sin(lx) * sin(lz)) -
+      cos(lx) * sin(cx) * sin(lz);
+  double crycrx = sin(cx) * sin(lx) + cos(cx) * cos(cy) * cos(lx) * cos(ly) +
+                  cos(cx) * cos(lx) * sin(cy) * sin(ly);
   oy = atan2(srycrx / cos(ox), crycrx / cos(ox));
 
-  double srzcrx = cos(cx)*cos(lx)*cos(lz)*sin(cz) - (cos(cz)*sin(cy) 
-                - cos(cy)*sin(cx)*sin(cz))*(sin(ly)*sin(lz) + cos(ly)*cos(lz)*sin(lx)) 
-                - (cos(cy)*cos(cz) + sin(cx)*sin(cy)*sin(cz))*(cos(ly)*sin(lz) - cos(lz)*sin(lx)*sin(ly));
-  double crzcrx = (sin(cy)*sin(cz) + cos(cy)*cos(cz)*sin(cx))*(sin(ly)*sin(lz) 
-                + cos(ly)*cos(lz)*sin(lx)) + (cos(cy)*sin(cz) - cos(cz)*sin(cx)*sin(cy))*(cos(ly)*sin(lz) 
-                - cos(lz)*sin(lx)*sin(ly)) + cos(cx)*cos(cz)*cos(lx)*cos(lz);
+  double srzcrx = cos(cx) * cos(lx) * cos(lz) * sin(cz) -
+                  (cos(cz) * sin(cy) - cos(cy) * sin(cx) * sin(cz)) *
+                      (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) -
+                  (cos(cy) * cos(cz) + sin(cx) * sin(cy) * sin(cz)) *
+                      (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly));
+  double crzcrx = (sin(cy) * sin(cz) + cos(cy) * cos(cz) * sin(cx)) *
+                      (sin(ly) * sin(lz) + cos(ly) * cos(lz) * sin(lx)) +
+                  (cos(cy) * sin(cz) - cos(cz) * sin(cx) * sin(cy)) *
+                      (cos(ly) * sin(lz) - cos(lz) * sin(lx) * sin(ly)) +
+                  cos(cx) * cos(cz) * cos(lx) * cos(lz);
   oz = atan2(srzcrx / cos(ox), crzcrx / cos(ox));
 }
 
@@ -95,39 +105,72 @@ void transformAssociateToBA()
   double salz = sin(transformAftBA[2]);
   double calz = cos(transformAftBA[2]);
 
-  double srx = -sbcx*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly) 
-             - cbcx*cbcz*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-             - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-             - cbcx*sbcz*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-             - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz);
+  double srx = -sbcx * (salx * sblx + calx * caly * cblx * cbly +
+                        calx * cblx * saly * sbly) -
+               cbcx * cbcz *
+                   (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+                    calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+                    cblx * cblz * salx) -
+               cbcx * sbcz *
+                   (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+                    calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+                    cblx * salx * sblz);
   pitchRec = -asin(srx);
 
-  double srycrx = (cbcy*sbcz - cbcz*sbcx*sbcy)*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-                - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-                - (cbcy*cbcz + sbcx*sbcy*sbcz)*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-                - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz) 
-                + cbcx*sbcy*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly);
-  double crycrx = (cbcz*sbcy - cbcy*sbcx*sbcz)*(calx*caly*(cblz*sbly - cbly*sblx*sblz) 
-                - calx*saly*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sblz) 
-                - (sbcy*sbcz + cbcy*cbcz*sbcx)*(calx*saly*(cbly*sblz - cblz*sblx*sbly) 
-                - calx*caly*(sbly*sblz + cbly*cblz*sblx) + cblx*cblz*salx) 
-                + cbcx*cbcy*(salx*sblx + calx*caly*cblx*cbly + calx*cblx*saly*sbly);
+  double srycrx =
+      (cbcy * sbcz - cbcz * sbcx * sbcy) *
+          (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+           calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+           cblx * cblz * salx) -
+      (cbcy * cbcz + sbcx * sbcy * sbcz) *
+          (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+           calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+           cblx * salx * sblz) +
+      cbcx * sbcy *
+          (salx * sblx + calx * caly * cblx * cbly + calx * cblx * saly * sbly);
+  double crycrx =
+      (cbcz * sbcy - cbcy * sbcx * sbcz) *
+          (calx * caly * (cblz * sbly - cbly * sblx * sblz) -
+           calx * saly * (cbly * cblz + sblx * sbly * sblz) +
+           cblx * salx * sblz) -
+      (sbcy * sbcz + cbcy * cbcz * sbcx) *
+          (calx * saly * (cbly * sblz - cblz * sblx * sbly) -
+           calx * caly * (sbly * sblz + cbly * cblz * sblx) +
+           cblx * cblz * salx) +
+      cbcx * cbcy *
+          (salx * sblx + calx * caly * cblx * cbly + calx * cblx * saly * sbly);
   yawRec = atan2(srycrx / cos(pitchRec), crycrx / cos(pitchRec));
-  
-  double srzcrx = sbcx*(cblx*cbly*(calz*saly - caly*salx*salz) 
-                - cblx*sbly*(caly*calz + salx*saly*salz) + calx*salz*sblx) 
-                - cbcx*cbcz*((caly*calz + salx*saly*salz)*(cbly*sblz - cblz*sblx*sbly) 
-                + (calz*saly - caly*salx*salz)*(sbly*sblz + cbly*cblz*sblx) 
-                - calx*cblx*cblz*salz) + cbcx*sbcz*((caly*calz + salx*saly*salz)*(cbly*cblz 
-                + sblx*sbly*sblz) + (calz*saly - caly*salx*salz)*(cblz*sbly - cbly*sblx*sblz) 
-                + calx*cblx*salz*sblz);
-  double crzcrx = sbcx*(cblx*sbly*(caly*salz - calz*salx*saly) 
-                - cblx*cbly*(saly*salz + caly*calz*salx) + calx*calz*sblx) 
-                + cbcx*cbcz*((saly*salz + caly*calz*salx)*(sbly*sblz + cbly*cblz*sblx) 
-                + (caly*salz - calz*salx*saly)*(cbly*sblz - cblz*sblx*sbly) 
-                + calx*calz*cblx*cblz) - cbcx*sbcz*((saly*salz + caly*calz*salx)*(cblz*sbly 
-                - cbly*sblx*sblz) + (caly*salz - calz*salx*saly)*(cbly*cblz + sblx*sbly*sblz) 
-                - calx*calz*cblx*sblz);
+
+  double srzcrx = sbcx * (cblx * cbly * (calz * saly - caly * salx * salz) -
+                          cblx * sbly * (caly * calz + salx * saly * salz) +
+                          calx * salz * sblx) -
+                  cbcx * cbcz *
+                      ((caly * calz + salx * saly * salz) *
+                           (cbly * sblz - cblz * sblx * sbly) +
+                       (calz * saly - caly * salx * salz) *
+                           (sbly * sblz + cbly * cblz * sblx) -
+                       calx * cblx * cblz * salz) +
+                  cbcx * sbcz *
+                      ((caly * calz + salx * saly * salz) *
+                           (cbly * cblz + sblx * sbly * sblz) +
+                       (calz * saly - caly * salx * salz) *
+                           (cblz * sbly - cbly * sblx * sblz) +
+                       calx * cblx * salz * sblz);
+  double crzcrx = sbcx * (cblx * sbly * (caly * salz - calz * salx * saly) -
+                          cblx * cbly * (saly * salz + caly * calz * salx) +
+                          calx * calz * sblx) +
+                  cbcx * cbcz *
+                      ((saly * salz + caly * calz * salx) *
+                           (sbly * sblz + cbly * cblz * sblx) +
+                       (caly * salz - calz * salx * saly) *
+                           (cbly * sblz - cblz * sblx * sbly) +
+                       calx * calz * cblx * cblz) -
+                  cbcx * sbcz *
+                      ((saly * salz + caly * calz * salx) *
+                           (cblz * sbly - cbly * sblx * sblz) +
+                       (caly * salz - calz * salx * saly) *
+                           (cbly * cblz + sblx * sbly * sblz) -
+                       calx * calz * cblx * sblz);
   rollRec = atan2(srzcrx / cos(pitchRec), crzcrx / cos(pitchRec));
 
   x1 = cos(rollRec) * txDiff - sin(rollRec) * tyDiff;
@@ -155,29 +198,36 @@ void depthPointsHandler(const sensor_msgs::PointCloud2ConstPtr& depthPoints2)
   pcl::fromROSMsg(*depthPoints2, *depthPointsStacked);
   int depthPointsStackedNum = depthPointsStacked->points.size();
 
-  for (int i = 0; i < keyframeNum; i++) {
+  for (int i = 0; i < keyframeNum; i++)
+  {
     depthPoints[i]->clear();
   }
 
   int keyframeCount = -1;
-  for (int i = 0; i < depthPointsStackedNum; i++) {
-    if (depthPointsStacked->points[i].ind == -2) {
+  for (int i = 0; i < depthPointsStackedNum; i++)
+  {
+    if (depthPointsStacked->points[i].ind == -2)
+    {
       keyframeCount++;
     }
 
-    if (keyframeCount >= 0 && keyframeCount < keyframeNum) {
+    if (keyframeCount >= 0 && keyframeCount < keyframeNum)
+    {
       depthPoints[keyframeCount]->push_back(depthPointsStacked->points[i]);
     }
   }
 
   bool enoughPoints = true;
-  for (int i = 0; i < keyframeNum; i++) {
-    if (depthPoints[i]->points.size() < 10) {
+  for (int i = 0; i < keyframeNum; i++)
+  {
+    if (depthPoints[i]->points.size() < 10)
+    {
       enoughPoints = false;
     }
   }
 
-  if (enoughPoints) {
+  if (enoughPoints)
+  {
     newKeyframe = true;
   }
 }
@@ -187,17 +237,21 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "bundleAdjust");
   ros::NodeHandle nh;
 
-  for (int i = 0; i < keyframeNum; i++) {
-    pcl::PointCloud<DepthPoint>::Ptr depthPointsTemp(new pcl::PointCloud<DepthPoint>());
+  for (int i = 0; i < keyframeNum; i++)
+  {
+    pcl::PointCloud<DepthPoint>::Ptr depthPointsTemp(
+        new pcl::PointCloud<DepthPoint>());
     depthPoints[i] = depthPointsTemp;
   }
 
-  ros::Subscriber depthPointsSub = nh.subscribe<sensor_msgs::PointCloud2>
-                                   ("/depth_points_stacked", 1, depthPointsHandler);
+  ros::Subscriber depthPointsSub = nh.subscribe<sensor_msgs::PointCloud2>(
+      "/depth_points_stacked", 1, depthPointsHandler);
 
-  ros::Publisher odomBefBAPub = nh.advertise<nav_msgs::Odometry> ("/bef_ba_to_init", 1);
+  ros::Publisher odomBefBAPub =
+      nh.advertise<nav_msgs::Odometry>("/bef_ba_to_init", 1);
 
-  ros::Publisher odomAftBAPub = nh.advertise<nav_msgs::Odometry> ("/aft_ba_to_init", 1);
+  ros::Publisher odomAftBAPub =
+      nh.advertise<nav_msgs::Odometry>("/aft_ba_to_init", 1);
 
   tf::TransformBroadcaster tfBroadcaster;
 
@@ -209,13 +263,13 @@ int main(int argc, char** argv)
   Noise noise0 = Information(mpNoise);
 
   MatrixXd dpNoise = eye(3);
-  //dpNoise(2, 2) = 1.;
+  // dpNoise(2, 2) = 1.;
   Noise noise1 = Information(dpNoise);
 
   MatrixXd ssNoise = 10000. * eye(6);
-  //ssNoise(3, 3) = 100;
-  //ssNoise(4, 4) = 100;
-  //ssNoise(5, 5) = 100;
+  // ssNoise(3, 3) = 100;
+  // ssNoise(4, 4) = 100;
+  // ssNoise(5, 5) = 100;
   Noise noise2 = Information(ssNoise);
 
   MatrixXd psNoise = 10000. * eye(6);
@@ -225,10 +279,12 @@ int main(int argc, char** argv)
   Noise noise3 = Information(psNoise);
 
   bool status = ros::ok();
-  while (status) {
+  while (status)
+  {
     ros::spinOnce();
 
-    if (newKeyframe) {
+    if (newKeyframe)
+    {
       newKeyframe = false;
 
       Slam ba;
@@ -247,8 +303,9 @@ int main(int argc, char** argv)
 
       transformAssociateToBA();
 
-      Pose3d_Factor* poseFactors0 = new Pose3d_Factor(pose0, 
-                                    Pose3d(tzRec, txRec, tyRec, yawRec, pitchRec, rollRec), noise2);
+      Pose3d_Factor* poseFactors0 = new Pose3d_Factor(
+          pose0, Pose3d(tzRec, txRec, tyRec, yawRec, pitchRec, rollRec),
+          noise2);
       ba.add_factor(poseFactors0);
 
       rollRec = depthPoints[0]->points[0].depth;
@@ -259,7 +316,8 @@ int main(int argc, char** argv)
       tzRec = depthPoints[0]->points[1].depth;
 
       vector<Pose3d_Pose3d_Factor*> posePoseFactors;
-      for (int i = 1; i < keyframeNum; i++) {
+      for (int i = 1; i < keyframeNum; i++)
+      {
         Pose3d_Node* posen = new Pose3d_Node();
         poses.push_back(posen);
         ba.add_node(posen);
@@ -288,109 +346,149 @@ int main(int argc, char** argv)
         tzDiff = z2;
 
         double rollDiff, pitchDiff, yawDiff;
-        diffRotation(pitch, yaw, roll, pitchRec, yawRec, rollRec, pitchDiff, yawDiff, rollDiff);
+        diffRotation(pitch, yaw, roll, pitchRec, yawRec, rollRec, pitchDiff,
+                     yawDiff, rollDiff);
 
-        Pose3d_Pose3d_Factor* poseposeFactorn = new Pose3d_Pose3d_Factor
-                                                (poses[i - 1], posen, Pose3d(tzDiff, txDiff, tyDiff, 
-                                                yawDiff, pitchDiff, rollDiff), noise3);
+        Pose3d_Pose3d_Factor* poseposeFactorn = new Pose3d_Pose3d_Factor(
+            poses[i - 1], posen,
+            Pose3d(tzDiff, txDiff, tyDiff, yawDiff, pitchDiff, rollDiff),
+            noise3);
         posePoseFactors.push_back(poseposeFactorn);
         ba.add_factor(poseposeFactorn);
 
-        rollRec = roll; pitchRec = pitch; yawRec = yaw;
-        txRec = tx; tyRec = ty; tzRec = tz;
+        rollRec = roll;
+        pitchRec = pitch;
+        yawRec = yaw;
+        txRec = tx;
+        tyRec = ty;
+        tzRec = tz;
       }
 
       vector<Point3d_Node*> points;
       std::vector<int> pointsInd;
       vector<Depthmono_Factor*> depthmonoFactors;
-      for (int i = 0; i < keyframeNum; i++) {
+      for (int i = 0; i < keyframeNum; i++)
+      {
         pcl::PointCloud<DepthPoint>::Ptr dpPointer = depthPoints[i];
         int kfptNum = dpPointer->points.size();
         int ptRecNum = points.size();
 
-        if (i == 0) {
+        if (i == 0)
+        {
           pcl::PointCloud<DepthPoint>::Ptr dpPointerNext = depthPoints[i + 1];
           int kfptNumNext = dpPointerNext->points.size();
 
           int ptCountNext = 2;
-          for (int j = 2; j < kfptNum; j++) {
+          for (int j = 2; j < kfptNum; j++)
+          {
             bool ptFound = false;
-            for (; ptCountNext < kfptNumNext; ptCountNext++) {
-              if (dpPointerNext->points[ptCountNext].ind == dpPointer->points[j].ind) {
+            for (; ptCountNext < kfptNumNext; ptCountNext++)
+            {
+              if (dpPointerNext->points[ptCountNext].ind ==
+                  dpPointer->points[j].ind)
+              {
                 ptFound = true;
               }
-              if (dpPointerNext->points[ptCountNext].ind >= dpPointer->points[j].ind) {
+              if (dpPointerNext->points[ptCountNext].ind >=
+                  dpPointer->points[j].ind)
+              {
                 break;
               }
             }
 
-            if (ptFound && dpPointer->points[j].label == 1) {
+            if (ptFound && dpPointer->points[j].label == 1)
+            {
               Point3d_Node* pointn = new Point3d_Node();
               points.push_back(pointn);
               pointsInd.push_back(dpPointer->points[j].ind);
               ba.add_node(pointn);
 
-              Depthmono_Factor* depthmonoFactorn = new Depthmono_Factor(poses[i], pointn, &camera,
-                                                   DepthmonoMeasurement(dpPointer->points[j].u,
-                                                   dpPointer->points[j].v, dpPointer->points[j].depth),
-                                                   noise1);
+              Depthmono_Factor* depthmonoFactorn = new Depthmono_Factor(
+                  poses[i], pointn, &camera,
+                  DepthmonoMeasurement(dpPointer->points[j].u,
+                                       dpPointer->points[j].v,
+                                       dpPointer->points[j].depth),
+                  noise1);
               depthmonoFactors.push_back(depthmonoFactorn);
               ba.add_factor(depthmonoFactorn);
             }
           }
-        } else if (i == keyframeNum - 1) {
+        }
+        else if (i == keyframeNum - 1)
+        {
           pcl::PointCloud<DepthPoint>::Ptr dpPointerLast = depthPoints[i - 1];
           int kfptNumLast = dpPointerLast->points.size();
 
           int ptCountLast = 2;
           int ptRecCount = 0;
-          for (int j = 2; j < kfptNum; j++) {
+          for (int j = 2; j < kfptNum; j++)
+          {
             bool ptFound = false;
-            for (; ptCountLast < kfptNumLast; ptCountLast++) {
-              if (dpPointerLast->points[ptCountLast].ind == dpPointer->points[j].ind) {
+            for (; ptCountLast < kfptNumLast; ptCountLast++)
+            {
+              if (dpPointerLast->points[ptCountLast].ind ==
+                  dpPointer->points[j].ind)
+              {
                 ptFound = true;
               }
-              if (dpPointerLast->points[ptCountLast].ind >= dpPointer->points[j].ind) {
+              if (dpPointerLast->points[ptCountLast].ind >=
+                  dpPointer->points[j].ind)
+              {
                 break;
               }
             }
 
-            if (ptFound /*&& dpPointer->points[j].label == 1*/) {
+            if (ptFound /*&& dpPointer->points[j].label == 1*/)
+            {
               bool prFound = false;
-              for (; ptRecCount < ptRecNum; ptRecCount++) {
-                if (pointsInd[ptRecCount] == dpPointer->points[j].ind) {
+              for (; ptRecCount < ptRecNum; ptRecCount++)
+              {
+                if (pointsInd[ptRecCount] == dpPointer->points[j].ind)
+                {
                   prFound = true;
                 }
-                if (pointsInd[ptRecCount] >= dpPointer->points[j].ind) {
+                if (pointsInd[ptRecCount] >= dpPointer->points[j].ind)
+                {
                   break;
                 }
               }
 
               Point3d_Node* pointn;
               Depthmono_Factor* depthmonoFactorn;
-              if (prFound) {
+              if (prFound)
+              {
                 pointn = points[ptRecCount];
 
-                depthmonoFactorn = new Depthmono_Factor(poses[i], pointn, &camera,
-                                   DepthmonoMeasurement(dpPointer->points[j].u,
-                                   dpPointer->points[j].v, dpPointer->points[j].depth), noise0);
-                //continue;
-              } else {
+                depthmonoFactorn = new Depthmono_Factor(
+                    poses[i], pointn, &camera,
+                    DepthmonoMeasurement(dpPointer->points[j].u,
+                                         dpPointer->points[j].v,
+                                         dpPointer->points[j].depth),
+                    noise0);
+                // continue;
+              }
+              else
+              {
                 pointn = new Point3d_Node();
                 points.push_back(pointn);
                 pointsInd.push_back(dpPointer->points[j].ind);
                 ba.add_node(pointn);
 
-                depthmonoFactorn = new Depthmono_Factor(poses[i], pointn, &camera,
-                                   DepthmonoMeasurement(dpPointer->points[j].u,
-                                   dpPointer->points[j].v, dpPointer->points[j].depth), noise1);
+                depthmonoFactorn = new Depthmono_Factor(
+                    poses[i], pointn, &camera,
+                    DepthmonoMeasurement(dpPointer->points[j].u,
+                                         dpPointer->points[j].v,
+                                         dpPointer->points[j].depth),
+                    noise1);
               }
 
               depthmonoFactors.push_back(depthmonoFactorn);
               ba.add_factor(depthmonoFactorn);
             }
           }
-        } else {
+        }
+        else
+        {
           pcl::PointCloud<DepthPoint>::Ptr dpPointerNext = depthPoints[i + 1];
           pcl::PointCloud<DepthPoint>::Ptr dpPointerLast = depthPoints[i - 1];
           int kfptNumNext = dpPointerNext->points.size();
@@ -399,57 +497,82 @@ int main(int argc, char** argv)
           int ptCountNext = 2;
           int ptCountLast = 2;
           int ptRecCount = 0;
-          for (int j = 2; j < kfptNum; j++) {
+          for (int j = 2; j < kfptNum; j++)
+          {
             bool ptFound = false;
-            for (; ptCountNext < kfptNumNext; ptCountNext++) {
-              if (dpPointerNext->points[ptCountNext].ind == dpPointer->points[j].ind) {
+            for (; ptCountNext < kfptNumNext; ptCountNext++)
+            {
+              if (dpPointerNext->points[ptCountNext].ind ==
+                  dpPointer->points[j].ind)
+              {
                 ptFound = true;
               }
-              if (dpPointerNext->points[ptCountNext].ind >= dpPointer->points[j].ind) {
+              if (dpPointerNext->points[ptCountNext].ind >=
+                  dpPointer->points[j].ind)
+              {
                 break;
               }
             }
 
-            if (!ptFound) {
-              for (; ptCountLast < kfptNumLast; ptCountLast++) {
-                if (dpPointerLast->points[ptCountLast].ind == dpPointer->points[j].ind) {
+            if (!ptFound)
+            {
+              for (; ptCountLast < kfptNumLast; ptCountLast++)
+              {
+                if (dpPointerLast->points[ptCountLast].ind ==
+                    dpPointer->points[j].ind)
+                {
                   ptFound = true;
                 }
-                if (dpPointerLast->points[ptCountLast].ind >= dpPointer->points[j].ind) {
+                if (dpPointerLast->points[ptCountLast].ind >=
+                    dpPointer->points[j].ind)
+                {
                   break;
                 }
               }
             }
 
-            if (ptFound /*&& dpPointer->points[j].label == 1*/) {
+            if (ptFound /*&& dpPointer->points[j].label == 1*/)
+            {
               bool prFound = false;
-              for (; ptRecCount < ptRecNum; ptRecCount++) {
-                if (pointsInd[ptRecCount] == dpPointer->points[j].ind) {
+              for (; ptRecCount < ptRecNum; ptRecCount++)
+              {
+                if (pointsInd[ptRecCount] == dpPointer->points[j].ind)
+                {
                   prFound = true;
                 }
-                if (pointsInd[ptRecCount] >= dpPointer->points[j].ind) {
-                    break;
+                if (pointsInd[ptRecCount] >= dpPointer->points[j].ind)
+                {
+                  break;
                 }
               }
 
               Point3d_Node* pointn;
               Depthmono_Factor* depthmonoFactorn;
-              if (prFound) {
+              if (prFound)
+              {
                 pointn = points[ptRecCount];
 
-                depthmonoFactorn = new Depthmono_Factor(poses[i], pointn, &camera,
-                                   DepthmonoMeasurement(dpPointer->points[j].u,
-                                   dpPointer->points[j].v, dpPointer->points[j].depth), noise0);
-                //continue;
-              } else {
+                depthmonoFactorn = new Depthmono_Factor(
+                    poses[i], pointn, &camera,
+                    DepthmonoMeasurement(dpPointer->points[j].u,
+                                         dpPointer->points[j].v,
+                                         dpPointer->points[j].depth),
+                    noise0);
+                // continue;
+              }
+              else
+              {
                 pointn = new Point3d_Node();
                 points.push_back(pointn);
                 pointsInd.push_back(dpPointer->points[j].ind);
                 ba.add_node(pointn);
 
-                depthmonoFactorn = new Depthmono_Factor(poses[i], pointn, &camera,
-                                   DepthmonoMeasurement(dpPointer->points[j].u,
-                                   dpPointer->points[j].v, dpPointer->points[j].depth), noise1);
+                depthmonoFactorn = new Depthmono_Factor(
+                    poses[i], pointn, &camera,
+                    DepthmonoMeasurement(dpPointer->points[j].u,
+                                         dpPointer->points[j].v,
+                                         dpPointer->points[j].depth),
+                    noise1);
               }
 
               depthmonoFactors.push_back(depthmonoFactorn);
@@ -478,12 +601,16 @@ int main(int argc, char** argv)
       transformAftBA[4] = poses[keyframeNum - 1]->value().z();
       transformAftBA[5] = poses[keyframeNum - 1]->value().x();
 
-      transformAftBA[0] = (1 - 0.5) * transformAftBA[0] + 0.5 * transformBefBA[0];
-      //transformAftBA[1] = (1 - 0.1) * transformAftBA[1] + 0.1 * transformBefBA[1];
-      transformAftBA[2] = (1 - 0.5) * transformAftBA[2] + 0.5 * transformBefBA[2];
+      transformAftBA[0] =
+          (1 - 0.5) * transformAftBA[0] + 0.5 * transformBefBA[0];
+      // transformAftBA[1] = (1 - 0.1) * transformAftBA[1] + 0.1 *
+      // transformBefBA[1];
+      transformAftBA[2] =
+          (1 - 0.5) * transformAftBA[2] + 0.5 * transformBefBA[2];
 
       int posesNum = poses.size();
-      for (int i = 1; i < posesNum; i++) {
+      for (int i = 1; i < posesNum; i++)
+      {
         delete poses[i];
       }
       poses.clear();
@@ -491,25 +618,29 @@ int main(int argc, char** argv)
       delete poseFactors0;
 
       int posePoseFactorsNum = posePoseFactors.size();
-      for (int i = 1; i < posePoseFactorsNum; i++) {
+      for (int i = 1; i < posePoseFactorsNum; i++)
+      {
         delete posePoseFactors[i];
       }
       posePoseFactors.clear();
 
       int pointsNum = points.size();
-      for (int i = 1; i < pointsNum; i++) {
+      for (int i = 1; i < pointsNum; i++)
+      {
         delete points[i];
       }
       points.clear();
 
       int depthmonoFactorsNum = depthmonoFactors.size();
-      for (int i = 1; i < depthmonoFactorsNum; i++) {
+      for (int i = 1; i < depthmonoFactorsNum; i++)
+      {
         delete depthmonoFactors[i];
       }
       depthmonoFactors.clear();
 
-      geometry_msgs::Quaternion geoQuat = tf::createQuaternionMsgFromRollPitchYaw
-                                (transformBefBA[2], -transformBefBA[0], -transformBefBA[1]);
+      geometry_msgs::Quaternion geoQuat =
+          tf::createQuaternionMsgFromRollPitchYaw(
+              transformBefBA[2], -transformBefBA[0], -transformBefBA[1]);
 
       nav_msgs::Odometry odomBefBA;
       odomBefBA.header.frame_id = "/camera_init";
@@ -524,8 +655,8 @@ int main(int argc, char** argv)
       odomBefBA.pose.pose.position.z = transformBefBA[5];
       odomBefBAPub.publish(odomBefBA);
 
-      geoQuat = tf::createQuaternionMsgFromRollPitchYaw
-                (transformAftBA[2], -transformAftBA[0], -transformAftBA[1]);
+      geoQuat = tf::createQuaternionMsgFromRollPitchYaw(
+          transformAftBA[2], -transformAftBA[0], -transformAftBA[1]);
 
       nav_msgs::Odometry odomAftBA;
       odomAftBA.header.frame_id = "/camera_init";
@@ -544,9 +675,10 @@ int main(int argc, char** argv)
       tfAftBA.frame_id_ = "/camera_init";
       tfAftBA.child_frame_id_ = "/aft_ba";
       tfAftBA.stamp_ = ros::Time().fromSec(depthPointsTime);
-      tfAftBA.setRotation(tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
-      tfAftBA.setOrigin(tf::Vector3(transformAftBA[3], 
-                            transformAftBA[4], transformAftBA[5]));
+      tfAftBA.setRotation(
+          tf::Quaternion(-geoQuat.y, -geoQuat.z, geoQuat.x, geoQuat.w));
+      tfAftBA.setOrigin(
+          tf::Vector3(transformAftBA[3], transformAftBA[4], transformAftBA[5]));
       tfBroadcaster.sendTransform(tfAftBA);
     }
 

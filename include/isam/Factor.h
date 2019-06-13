@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 
-#include <math.h> // for sqrt
+#include <math.h>  // for sqrt
 #include <Eigen/Dense>
 
 #include "util.h"
@@ -40,95 +40,122 @@
 #include "Noise.h"
 #include "numericalDiff.h"
 
-namespace isam {
-
-//typedef double (*cost_func_t)(double);
-
+namespace isam
+{
+// typedef double (*cost_func_t)(double);
 
 // Factor of the graph of measurements between Nodes.
-class Factor : public Element, Function {
-  friend std::ostream& operator<<(std::ostream& output, const Factor& e) {
+class Factor : public Element, Function
+{
+  friend std::ostream& operator<<(std::ostream& output, const Factor& e)
+  {
     e.write(output);
     return output;
   }
 
-  cost_func_t *ptr_cost_func;
+  cost_func_t* ptr_cost_func;
 
   static int _next_id;
   bool _deleted;
-protected:
 
+protected:
   const Noise _noise;
 
-  std::vector<Node*> _nodes; // list of nodes affected by measurement
+  std::vector<Node*> _nodes;  // list of nodes affected by measurement
 
 public:
-
-  virtual Eigen::VectorXd error(Selector s = ESTIMATE) const {
+  virtual Eigen::VectorXd error(Selector s = ESTIMATE) const
+  {
     Eigen::VectorXd err = _noise.sqrtinf() * basic_error(s);
     // optional modified cost function
-    if (*ptr_cost_func) {
-      for (int i=0; i<err.size(); i++) {
+    if (*ptr_cost_func)
+    {
+      for (int i = 0; i < err.size(); i++)
+      {
         double val = err(i);
-        err(i) = ((val>=0)?1.:(-1.)) * sqrt((*ptr_cost_func)(val));
+        err(i) = ((val >= 0) ? 1. : (-1.)) * sqrt((*ptr_cost_func)(val));
       }
     }
     return err;
   }
 
-  std::vector<Node*>& nodes() {return _nodes;}
+  std::vector<Node*>& nodes()
+  {
+    return _nodes;
+  }
 
   Factor(const char* name, int dim, const Noise& noise)
-    : Element(name, dim), ptr_cost_func(NULL), _deleted(false), _noise(noise) {
+    : Element(name, dim), ptr_cost_func(NULL), _deleted(false), _noise(noise)
+  {
 #ifndef NDEBUG
     // all lower triagular entries below the diagonal must be 0
-    for (int r=0; r<_noise.sqrtinf().rows(); r++) {
-      for (int c=0; c<r; c++) {
-        requireDebug(_noise.sqrtinf()(r,c)==0, "Factor::Factor: sqrtinf must be upper triangular!");
+    for (int r = 0; r < _noise.sqrtinf().rows(); r++)
+    {
+      for (int c = 0; c < r; c++)
+      {
+        requireDebug(_noise.sqrtinf()(r, c) == 0, "Factor::Factor: sqrtinf "
+                                                  "must be upper triangular!");
       }
     }
 #endif
     _id = _next_id++;
   }
 
-  virtual ~Factor() {}
+  virtual ~Factor()
+  {
+  }
 
   virtual void initialize() = 0;
 
-  virtual void initialize_internal() {
-    for (unsigned int i=0; i<_nodes.size(); i++) {
+  virtual void initialize_internal()
+  {
+    for (unsigned int i = 0; i < _nodes.size(); i++)
+    {
       _nodes[i]->add_factor(this);
     }
     initialize();
   }
 
-  virtual void set_cost_function(cost_func_t* ptr) {ptr_cost_func = ptr;}
+  virtual void set_cost_function(cost_func_t* ptr)
+  {
+    ptr_cost_func = ptr;
+  }
 
   virtual Eigen::VectorXd basic_error(Selector s = ESTIMATE) const = 0;
 
-  virtual const Eigen::MatrixXd& sqrtinf() const {return _noise.sqrtinf();}
+  virtual const Eigen::MatrixXd& sqrtinf() const
+  {
+    return _noise.sqrtinf();
+  }
 
-  Eigen::VectorXd evaluate() const {
+  Eigen::VectorXd evaluate() const
+  {
     return error(LINPOINT);
   }
 
-  virtual Jacobian jacobian_internal(bool force_numerical) {
-    if (force_numerical) {
+  virtual Jacobian jacobian_internal(bool force_numerical)
+  {
+    if (force_numerical)
+    {
       // ignore any symbolic derivative provided by user
       return Factor::jacobian();
-    } else {
+    }
+    else
+    {
       return jacobian();
     }
   }
 
   // can be replaced by symbolic derivative by user
-  virtual Jacobian jacobian() {
+  virtual Jacobian jacobian()
+  {
     Eigen::MatrixXd H = numerical_jacobian();
     Eigen::VectorXd r = error(LINPOINT);
     Jacobian jac(r);
     int position = 0;
     int n_measure = dim();
-    for (unsigned int i=0; i<_nodes.size(); i++) {
+    for (unsigned int i = 0; i < _nodes.size(); i++)
+    {
       int n_var = _nodes[i]->dim();
       Eigen::MatrixXd Hi = H.block(0, position, n_measure, n_var);
       position += n_var;
@@ -137,49 +164,64 @@ public:
     return jac;
   }
 
-  int num_measurements() const {
+  int num_measurements() const
+  {
     return dim();
   }
 
-  void mark_deleted() { _deleted = true; }
-  bool deleted() const { return _deleted; }
+  void mark_deleted()
+  {
+    _deleted = true;
+  }
+  bool deleted() const
+  {
+    return _deleted;
+  }
 
-  virtual void write(std::ostream &out) const {
+  virtual void write(std::ostream& out) const
+  {
     Element::write(out);
-    for (unsigned int i=0; i<_nodes.size(); i++) {
-      if (_nodes[i]) {
+    for (unsigned int i = 0; i < _nodes.size(); i++)
+    {
+      if (_nodes[i])
+      {
         out << " " << _nodes[i]->unique_id();
       }
     }
   }
 
 private:
-
-  virtual Eigen::MatrixXd numerical_jacobian() {
+  virtual Eigen::MatrixXd numerical_jacobian()
+  {
     return numericalDiff(*this);
   }
-
 };
 
 /**
  * Convert upper triangular square root information matrix to string.
  * @param sqrtinf Upper triangular square matrix.
  */
-inline std::string noise_to_string(const Noise& noise) {
+inline std::string noise_to_string(const Noise& noise)
+{
   int nrows = noise.sqrtinf().rows();
   int ncols = noise.sqrtinf().cols();
-  require(nrows==ncols, "slam2d::sqrtinf_to_string: matrix must be square");
+  require(nrows == ncols, "slam2d::sqrtinf_to_string: matrix must be square");
   std::stringstream s;
   s << "{";
   bool first = true;
-  for (int r=0; r<nrows; r++) {
-    for (int c=r; c<ncols; c++) {
-      if (first) {
+  for (int r = 0; r < nrows; r++)
+  {
+    for (int c = r; c < ncols; c++)
+    {
+      if (first)
+      {
         first = false;
-      } else {
+      }
+      else
+      {
         s << ",";
       }
-      s << noise.sqrtinf()(r,c);
+      s << noise.sqrtinf()(r, c);
     }
   }
   s << "}";
@@ -188,25 +230,29 @@ inline std::string noise_to_string(const Noise& noise) {
 
 // Generic template for easy instantiation of new factors
 template <class T>
-class FactorT : public Factor {
-
+class FactorT : public Factor
+{
 protected:
-
   const T _measure;
-  
+
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  FactorT(const char* name, int dim, const Noise& noise, const T& measure) : Factor(name, dim, noise), _measure(measure) {}
+  FactorT(const char* name, int dim, const Noise& noise, const T& measure)
+    : Factor(name, dim, noise), _measure(measure)
+  {
+  }
 
-  const T& measurement() const {return _measure;}
+  const T& measurement() const
+  {
+    return _measure;
+  }
 
-  void write(std::ostream &out) const {
+  void write(std::ostream& out) const
+  {
     Factor::write(out);
     out << " " << _measure << " " << noise_to_string(_noise);
   }
-
 };
 
-
-}
+}  // namespace isam

@@ -32,12 +32,15 @@
 
 #include "isam/Node.h"
 
-namespace isam {
-
+namespace isam
+{
 // Abstract class to enforce interface for function object.
-class Function {
+class Function
+{
 public:
-  virtual ~Function() {}
+  virtual ~Function()
+  {
+  }
   virtual int num_measurements() const = 0;
   virtual Eigen::VectorXd evaluate() const = 0;
   virtual std::vector<Node*>& nodes() = 0;
@@ -46,10 +49,11 @@ public:
 /**
  * Takes a general vector valued function and returns the
  * Jacobian at the linearization point given by x0.
- * @param func Function object with evaluation function that takes and returns vectors.
+ * @param func Function object with evaluation function that takes and returns
+ * vectors.
  * @return Matrix containing the Jacobian of func, with
  *         dim(y) rows and dim(x) columns, where y=func(x).
  */
 Eigen::MatrixXd numericalDiff(Function& func);
 
-}
+}  // namespace isam

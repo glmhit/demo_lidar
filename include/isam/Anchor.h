@@ -35,15 +35,16 @@
 #include "Pose3d.h"
 #include "Slam.h"
 
-namespace isam {
-
+namespace isam
+{
 typedef NodeT<Pose2d> Pose2d_Node;
 typedef NodeT<Pose3d> Pose3d_Node;
 
 /**
  * A anchor node for 2d poses
  */
-class Anchor2d_Node : public Pose2d_Node {
+class Anchor2d_Node : public Pose2d_Node
+{
 public:
   Anchor2d_Node(Slam* slam);
   ~Anchor2d_Node();
@@ -72,7 +73,10 @@ public:
    */
   void merge(Anchor2d_Node* a, Pose2d old_origin);
 
-  Anchor2d_Node* parent() { return _parent; }
+  Anchor2d_Node* parent()
+  {
+    return _parent;
+  }
 
 private:
   Anchor2d_Node* _parent;
@@ -84,7 +88,8 @@ private:
 /**
  * A anchor node for 3d poses
  */
-class Anchor3d_Node : public Pose3d_Node {
+class Anchor3d_Node : public Pose3d_Node
+{
 public:
   Anchor3d_Node(Slam* slam);
   ~Anchor3d_Node();
@@ -113,7 +118,10 @@ public:
    */
   void merge(Anchor3d_Node* a, Pose3d old_origin);
 
-  Anchor3d_Node* parent() { return _parent; }
+  Anchor3d_Node* parent()
+  {
+    return _parent;
+  }
 
 private:
   Anchor3d_Node* _parent;
@@ -122,4 +130,4 @@ private:
   Slam* _slam;
 };
 
-}
+}  // namespace isam

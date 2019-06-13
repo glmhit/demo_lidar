@@ -32,15 +32,16 @@
 
 #include "SparseVector.h"
 
-namespace isam {
-
+namespace isam
+{
 typedef SparseVector* SparseVector_p;
 
-class SparseMatrix {
-  int _num_rows; // current number of rows
-  int _num_cols; // current number of columns
-  int _max_num_rows; // allocated number of row indices
-  int _max_num_cols; // allocated number of columns
+class SparseMatrix
+{
+  int _num_rows;          // current number of rows
+  int _num_cols;          // current number of columns
+  int _max_num_rows;      // allocated number of row indices
+  int _max_num_cols;      // allocated number of columns
   SparseVector_p* _rows;  // pointers to the actual rows
 
   /**
@@ -50,7 +51,8 @@ class SparseMatrix {
    * @param max_num_rows Number of rows to reserve memory for.
    * @param max_num_cols Number of columns to reserve memory for.
    */
-  void _allocate_SparseMatrix(int num_rows, int num_cols, int max_num_rows, int max_num_cols, bool init_rows = true);
+  void _allocate_SparseMatrix(int num_rows, int num_cols, int max_num_rows,
+                              int max_num_cols, bool init_rows = true);
 
   /**
    * Copy data from one sparse matrix to a new one - private.
@@ -64,7 +66,6 @@ class SparseMatrix {
   void _dealloc_SparseMatrix();
 
 public:
-
   /**
    * Constructor.
    * @param num_rows Initial number of rows.
@@ -86,7 +87,8 @@ public:
    * @param first_row Row offset.
    * @param first_col Column offset.
    */
-  SparseMatrix(const SparseMatrix& mat, int num_rows, int num_cols, int first_row = 0, int first_col = 0);
+  SparseMatrix(const SparseMatrix& mat, int num_rows, int num_cols,
+               int first_row = 0, int first_col = 0);
 
   SparseMatrix(int num_rows, int num_cols, SparseVector_p* rows);
 
@@ -100,7 +102,7 @@ public:
    * @param mat Right-hand-side matrix in assignment
    * @return self.
    */
-  const SparseMatrix& operator= (const SparseMatrix& mat);
+  const SparseMatrix& operator=(const SparseMatrix& mat);
 
   /**
    * Read a matrix entry.
@@ -115,17 +117,20 @@ public:
    * @param row Row of entry.
    * @param col Column of entry.
    * @param val New value of entry.
-   * @param grow_matrix Enlarge matrix if entry outside current size (default: false).
+   * @param grow_matrix Enlarge matrix if entry outside current size (default:
+   * false).
    */
-  virtual void set(int row, int col, const double val, bool grow_matrix = false);
+  virtual void set(int row, int col, const double val,
+                   bool grow_matrix = false);
 
   /**
    * Append a new entry to a row. Allows efficient adding of presorted elements.
    * @param row Row of new entry.
-   * @param col Column of new entry - must be after last existing one in this row.
+   * @param col Column of new entry - must be after last existing one in this
+   * row.
    * @param val Value of new entry.
    */
-  virtual void append_in_row(int row, int col,const double val);
+  virtual void append_in_row(int row, int col, const double val);
 
   /**
    * Determine number of non-zero entries in sparse matrix.
@@ -208,7 +213,8 @@ public:
   virtual void ensure_num_rows(int num_rows);
 
   /**
-   * Grow matrix to given number of columns; ignore if already at least as large.
+   * Grow matrix to given number of columns; ignore if already at least as
+   * large.
    * @param num_cols Number of columns.
    */
   virtual void ensure_num_cols(int num_cols);
@@ -226,23 +232,33 @@ public:
    * @param c_givens Returns cosine of givens rotation if not NULL.
    * @param s_givens Returns sine of givens rotation if not NULL.
    */
-  virtual void apply_givens(int row, int col, double* c_givens = NULL, double* s_givens = NULL);
+  virtual void apply_givens(int row, int col, double* c_givens = NULL,
+                            double* s_givens = NULL);
 
   /**
-   * Triangulate matrix by applying Givens rotations to all entries below the diagonal.
+   * Triangulate matrix by applying Givens rotations to all entries below the
+   * diagonal.
    * @return Number of Givens rotations applied (for analysis).
    */
   virtual int triangulate_with_givens();
 
-  inline int num_rows() const {return _num_rows;}
-  inline int num_cols() const {return _num_cols;}
+  inline int num_rows() const
+  {
+    return _num_rows;
+  }
+  inline int num_cols() const
+  {
+    return _num_cols;
+  }
 
   friend class OrderedSparseMatrix;
 };
 
-const Eigen::VectorXd operator*(const SparseMatrix& lhs, const Eigen::VectorXd& rhs);
-Eigen::VectorXd mul_SparseMatrixTrans_Vector(const SparseMatrix& lhs, const Eigen::VectorXd& rhs);
+const Eigen::VectorXd operator*(const SparseMatrix& lhs,
+                                const Eigen::VectorXd& rhs);
+Eigen::VectorXd mul_SparseMatrixTrans_Vector(const SparseMatrix& lhs,
+                                             const Eigen::VectorXd& rhs);
 SparseMatrix sparseMatrix_of_matrix(const Eigen::MatrixXd& m);
 Eigen::MatrixXd matrix_of_sparseMatrix(const SparseMatrix& s);
 
-}
+}  // namespace isam

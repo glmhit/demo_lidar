@@ -29,14 +29,17 @@
 
 #include <Eigen/Dense>
 
-namespace Eigen {
- typedef Matrix<bool, Dynamic, 1> VectorXb;
+namespace Eigen
+{
+typedef Matrix<bool, Dynamic, 1> VectorXb;
 }
 
-namespace isam {
-
-class Point2d {
-  friend std::ostream& operator<<(std::ostream& out, const Point2d& p) {
+namespace isam
+{
+class Point2d
+{
+  friend std::ostream& operator<<(std::ostream& out, const Point2d& p)
+  {
     p.write(out);
     return out;
   }
@@ -47,46 +50,70 @@ class Point2d {
 public:
   static const int dim = 2;
   static const int size = 2;
-  static const char* name() {
+  static const char* name()
+  {
     return "Point2d";
   }
-  Point2d() : _x(0), _y(0) {}
-  Point2d(double x, double y) : _x(x), _y(y) {}
-  Point2d(const Eigen::Vector2d& vec) : _x(vec(0)), _y(vec(1)) {}
+  Point2d() : _x(0), _y(0)
+  {
+  }
+  Point2d(double x, double y) : _x(x), _y(y)
+  {
+  }
+  Point2d(const Eigen::Vector2d& vec) : _x(vec(0)), _y(vec(1))
+  {
+  }
 
-  double x() const {return _x;}
-  double y() const {return _y;}
+  double x() const
+  {
+    return _x;
+  }
+  double y() const
+  {
+    return _y;
+  }
 
-  void set_x(double x) {_x = x;}
-  void set_y(double y) {_y = y;}
+  void set_x(double x)
+  {
+    _x = x;
+  }
+  void set_y(double y)
+  {
+    _y = y;
+  }
 
-  Point2d exmap(const Eigen::Vector2d& delta) const {
+  Point2d exmap(const Eigen::Vector2d& delta) const
+  {
     Point2d res = *this;
     res._x += delta(0);
     res._y += delta(1);
     return res;
   }
 
-  Eigen::Vector2d vector() const {
+  Eigen::Vector2d vector() const
+  {
     Eigen::Vector2d v(_x, _y);
     return v;
   }
-  void set(double x, double y) {
+  void set(double x, double y)
+  {
     _x = x;
     _y = y;
   }
-  void set(const Eigen::Vector2d& v) {
+  void set(const Eigen::Vector2d& v)
+  {
     _x = v(0);
     _y = v(1);
   }
-  void write(std::ostream &out) const {
+  void write(std::ostream& out) const
+  {
     out << "(" << _x << ", " << _y << ")";
   }
-  
-  Eigen::VectorXb is_angle() const {
+
+  Eigen::VectorXb is_angle() const
+  {
     return Eigen::VectorXb::Zero(size);
   }
-  
 };
 
-}
+}  // namespace isam

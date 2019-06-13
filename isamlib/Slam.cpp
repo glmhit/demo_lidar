@@ -41,8 +41,8 @@
 using namespace std;
 using namespace Eigen;
 
-namespace isam {
-
+namespace isam
+{
 // for numbering of factors and nodes
 int Node::_next_id = 0;
 int Factor::_next_id = 0;
@@ -50,16 +50,23 @@ int Factor::_next_id = 0;
 struct DeleteOnReturn
 {
   SparseVector** _ptr;
-  explicit DeleteOnReturn(SparseVector** ptr) : _ptr(ptr) {}
-  ~DeleteOnReturn() { delete [] _ptr; }
+  explicit DeleteOnReturn(SparseVector** ptr) : _ptr(ptr)
+  {
+  }
+  ~DeleteOnReturn()
+  {
+    delete[] _ptr;
+  }
 };
 
 // for getting correct starting positions in matrix for each node,
 // only needed after removing nodes
-void Slam::update_starts() {
+void Slam::update_starts()
+{
   int start = 0;
   const list<Node*>& nodes = get_nodes();
-  for (list<Node*>::const_iterator it = nodes.begin(); it!=nodes.end(); it++) {
+  for (list<Node*>::const_iterator it = nodes.begin(); it != nodes.end(); it++)
+  {
     Node* node = *it;
     node->_start = start;
     start += node->dim();
@@ -67,13 +74,17 @@ void Slam::update_starts() {
 }
 
 Slam::Slam()
-  : Graph(),
-    _step(0), _prop(Properties()),
-    _covariances(this),
-    _require_batch(true), _cost_func(NULL),
-    _dim_nodes(0), _dim_measure(0),
-    _num_new_measurements(0), _num_new_rows(0),
-    _opt(*this)
+  : Graph()
+  , _step(0)
+  , _prop(Properties())
+  , _covariances(this)
+  , _require_batch(true)
+  , _cost_func(NULL)
+  , _dim_nodes(0)
+  , _dim_measure(0)
+  , _num_new_measurements(0)
+  , _num_new_rows(0)
+  , _opt(*this)
 {
 }
 
@@ -81,20 +92,24 @@ Slam::~Slam()
 {
 }
 
-void Slam::save(const string fname) const {
+void Slam::save(const string fname) const
+{
   ofstream out(fname.c_str(), ios::out | ios::binary);
   require(out, "Slam.save: Cannot open output file.");
   write(out);
   out.close();
 }
 
-void Slam::add_node(Node* node) {
+void Slam::add_node(Node* node)
+{
   Graph::add_node(node);
   _dim_nodes += node->dim();
 }
 
-void Slam::add_factor(Factor* factor) {
-  // adds itself to factor lists of adjacent nodes; also initialized linked nodes if necessary
+void Slam::add_factor(Factor* factor)
+{
+  // adds itself to factor lists of adjacent nodes; also initialized linked
+  // nodes if necessary
   factor->initialize_internal();
   // needed to change cost function
   factor->set_cost_function(&_cost_func);
@@ -104,10 +119,14 @@ void Slam::add_factor(Factor* factor) {
   _dim_measure += factor->dim();
 }
 
-void Slam::remove_node(Node* node) {
-  // make a copy, as the original will indirectly be modified below in remove_factor()
-  list<Factor*> factors = node->factors(); 
-  for (list<Factor*>::iterator factor = factors.begin(); factor!=factors.end(); factor++) {
+void Slam::remove_node(Node* node)
+{
+  // make a copy, as the original will indirectly be modified below in
+  // remove_factor()
+  list<Factor*> factors = node->factors();
+  for (list<Factor*>::iterator factor = factors.begin();
+       factor != factors.end(); factor++)
+  {
     remove_factor(*factor);
   }
   _dim_nodes -= node->dim();
@@ -115,9 +134,12 @@ void Slam::remove_node(Node* node) {
   _require_batch = true;
 }
 
-void Slam::remove_factor(Factor* factor) {
+void Slam::remove_factor(Factor* factor)
+{
   vector<Node*> nodes = factor->nodes();
-  for (vector<Node*>::iterator node = nodes.begin(); node!=nodes.end(); node++) {
+  for (vector<Node*>::iterator node = nodes.begin(); node != nodes.end();
+       node++)
+  {
     (*node)->remove_factor(factor);
   }
   _dim_measure -= factor->dim();
@@ -159,9 +181,9 @@ UpdateStats Slam::update()
   UpdateStats stats;
   stats.batch = false;
   stats.solve = false;
-  if (_step%_prop.mod_update == 0)
+  if (_step % _prop.mod_update == 0)
   {
-    if (_step%_prop.mod_batch == 0)
+    if (_step % _prop.mod_batch == 0)
     {
       // batch solve periodically to avoid fill-in
       if (!_prop.quiet)
@@ -181,7 +203,7 @@ UpdateStats Slam::update()
         fflush(stdout);
       }
       incremental_update();
-      if (_step%_prop.mod_solve == 0)
+      if (_step % _prop.mod_solve == 0)
       {
         stats.solve = true;
 
@@ -209,13 +231,17 @@ int Slam::batch_optimization()
   return num_iterations;
 }
 
-void Slam::set_cost_function(cost_func_t func) {
+void Slam::set_cost_function(cost_func_t func)
+{
   _cost_func = func;
 }
 
-void Slam::apply_exmap(const Eigen::VectorXd& x) {
+void Slam::apply_exmap(const Eigen::VectorXd& x)
+{
   int pos = 0;
-  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end(); node++) {
+  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end();
+       node++)
+  {
     int dim = (*node)->dim();
     const VectorXd& xi = x.segment(pos, dim);
     (*node)->apply_exmap(xi);
@@ -223,9 +249,12 @@ void Slam::apply_exmap(const Eigen::VectorXd& x) {
   }
 }
 
-void Slam::self_exmap(const Eigen::VectorXd& x) {
+void Slam::self_exmap(const Eigen::VectorXd& x)
+{
   int pos = 0;
-  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end(); node++) {
+  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end();
+       node++)
+  {
     int dim = (*node)->dim();
     VectorXd xi = x.segment(pos, dim);
     (*node)->self_exmap(xi);
@@ -233,29 +262,41 @@ void Slam::self_exmap(const Eigen::VectorXd& x) {
   }
 }
 
-void Slam::linpoint_to_estimate() {
-  for (list<Node*>::iterator node = _nodes.begin(); node!=_nodes.end(); node++) {
+void Slam::linpoint_to_estimate()
+{
+  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end();
+       node++)
+  {
     (*node)->linpoint_to_estimate();
   }
 }
 
-void Slam::estimate_to_linpoint() {
-  for (list<Node*>::iterator node = _nodes.begin(); node!=_nodes.end(); node++) {
+void Slam::estimate_to_linpoint()
+{
+  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end();
+       node++)
+  {
     (*node)->estimate_to_linpoint();
   }
 }
 
-void Slam::swap_estimates() {
-  for (list<Node*>::iterator node = _nodes.begin(); node!=_nodes.end(); node++) {
+void Slam::swap_estimates()
+{
+  for (list<Node*>::iterator node = _nodes.begin(); node != _nodes.end();
+       node++)
+  {
     (*node)->swap_estimates();
   }
 }
 
-VectorXd Slam::weighted_errors(Selector s) {
+VectorXd Slam::weighted_errors(Selector s)
+{
   VectorXd werrors(_dim_measure);
   const list<Factor*>& factors = get_factors();
   int start = 0;
-  for (list<Factor*>::const_iterator it = factors.begin(); it!=factors.end(); it++) {
+  for (list<Factor*>::const_iterator it = factors.begin(); it != factors.end();
+       it++)
+  {
     int dim = (*it)->dim();
     werrors.segment(start, dim) = (*it)->error(s);
     start += dim;
@@ -263,78 +304,88 @@ VectorXd Slam::weighted_errors(Selector s) {
   return werrors;
 }
 
-double Slam::chi2(Selector s) {
+double Slam::chi2(Selector s)
+{
   return weighted_errors(s).squaredNorm();
 }
 
-double Slam::local_chi2(int last_n) {
+double Slam::local_chi2(int last_n)
+{
   // avoiding two passes by allocating maximum size vector
   VectorXd werrors(_dim_measure);
   const list<Factor*>& factors = get_factors();
   int start = _dim_measure;
   int n = 0;
   for (list<Factor*>::const_reverse_iterator it = factors.rbegin();
-      it!=factors.rend() && n<last_n;
-      it++, n++) {
+       it != factors.rend() && n < last_n; it++, n++)
+  {
     int dim = (*it)->dim();
     start -= dim;
     werrors.segment(start, dim) = (*it)->error(ESTIMATE);
   }
   // only use actually calculated part of werrors
-  return werrors.tail(_dim_measure-start).squaredNorm();
+  return werrors.tail(_dim_measure - start).squaredNorm();
 }
 
-double Slam::normalized_chi2() {
+double Slam::normalized_chi2()
+{
   return chi2() / (double)(_dim_measure - _dim_nodes);
 }
 
-const SparseSystem& Slam::get_R() const {
+const SparseSystem& Slam::get_R() const
+{
   return _R;
 }
 
 const double epsilon = 0.0001;
 
-SparseSystem Slam::jacobian_numerical_columnwise() {
+SparseSystem Slam::jacobian_numerical_columnwise()
+{
   // label starting points of rows, and initialize sparse row vectors with
   // correct number of entries
   int num_rows = _dim_measure;
-  DeleteOnReturn rows_ptr(new SparseVector* [num_rows]);
-  SparseVector** rows = rows_ptr._ptr; //[num_rows];
+  DeleteOnReturn rows_ptr(new SparseVector*[num_rows]);
+  SparseVector** rows = rows_ptr._ptr;  //[num_rows];
   int pos = 0;
   vector<int> factor_offset(get_factors().size());
   for (list<Factor*>::const_iterator it = get_factors().begin();
-      it!=get_factors().end();
-      it++) {
+       it != get_factors().end(); it++)
+  {
     (*it)->_start = pos;
     int dimtotal = 0;
     for (vector<Node*>::const_iterator it2 = (*it)->nodes().begin();
-        it2!=(*it)->nodes().end();
-        it2++) {
+         it2 != (*it)->nodes().end(); it2++)
+    {
       dimtotal += (*it2)->dim();
     }
-    for (int i=0; i<(*it)->dim(); i++, pos++) {
+    for (int i = 0; i < (*it)->dim(); i++, pos++)
+    {
       // do not delete, will be pulled into SparseSystem below
       rows[pos] = new SparseVector(dimtotal);
     }
   }
-  // larger than needed, but avoids some book keeping and avoids many (smaller) allocations
+  // larger than needed, but avoids some book keeping and avoids many (smaller)
+  // allocations
   VectorXd y_plus(num_rows);
   VectorXd y_minus(num_rows);
   int col = 0;
-  for (list<Node*>::const_iterator it = get_nodes().begin(); it!=get_nodes().end(); it++) {
+  for (list<Node*>::const_iterator it = get_nodes().begin();
+       it != get_nodes().end(); it++)
+  {
     Node* node = *it;
     int dim_node = node->dim();
     VectorXd delta(dim_node);
     delta.setZero();
     VectorXd original = node->vector0();
-    for (int c=0; c<dim_node; c++, col++) {
+    for (int c = 0; c < dim_node; c++, col++)
+    {
       // calculate column for +epsilon
       delta(c) = epsilon;
       node->self_exmap(delta);
       int row = 0;
       for (list<Factor*>::const_iterator it_factor = node->factors().begin();
-          it_factor!=node->factors().end();
-          it_factor++) {
+           it_factor != node->factors().end(); it_factor++)
+      {
         Factor* factor = *it_factor;
         int dim_factor = factor->dim();
         y_plus.segment(row, dim_factor) = factor->evaluate();
@@ -342,31 +393,35 @@ SparseSystem Slam::jacobian_numerical_columnwise() {
       }
       node->update0(original);
       // calculate column for -epsilon
-      delta(c) = - epsilon;
+      delta(c) = -epsilon;
       node->self_exmap(delta);
       row = 0;
       for (list<Factor*>::const_iterator it_factor = node->factors().begin();
-          it_factor!=node->factors().end();
-          it_factor++) {
+           it_factor != node->factors().end(); it_factor++)
+      {
         Factor* factor = *it_factor;
         int dim_factor = factor->dim();
         y_minus.segment(row, dim_factor) = factor->evaluate();
         row += dim_factor;
       }
       node->update0(original);
-      delta(c) = 0.; // reusing delta
+      delta(c) = 0.;  // reusing delta
       // calculate derivative
-      VectorXd diff = (y_plus.head(row) - y_minus.head(row)) / (epsilon + epsilon);
+      VectorXd diff =
+          (y_plus.head(row) - y_minus.head(row)) / (epsilon + epsilon);
       // write entries into sparse Jacobian
       row = 0;
       int i = 0;
       for (list<Factor*>::const_iterator it_factor = (*it)->factors().begin();
-          it_factor!=(*it)->factors().end();
-          it_factor++, i++) {
-        for (int r=0; r<(*it_factor)->dim(); r++, row++) {
-          if (diff(row)!=0.) { // omit 0 entries
+           it_factor != (*it)->factors().end(); it_factor++, i++)
+      {
+        for (int r = 0; r < (*it_factor)->dim(); r++, row++)
+        {
+          if (diff(row) != 0.)
+          {  // omit 0 entries
             int offset = (*it_factor)->_start;
-            rows[offset+r]->append(col, diff(row)); // faster than SparseVector.set
+            rows[offset + r]->append(col, diff(row));  // faster than
+                                                       // SparseVector.set
           }
         }
       }
@@ -376,54 +431,68 @@ SparseSystem Slam::jacobian_numerical_columnwise() {
   return SparseSystem(num_rows, _dim_nodes, rows, rhs);
 }
 
-SparseSystem Slam::jacobian() {
-  if (_prop.force_numerical_jacobian) {
+SparseSystem Slam::jacobian()
+{
+  if (_prop.force_numerical_jacobian)
+  {
     // column-wise is more efficient, especially if some nodes are
     // connected to many factors
     return jacobian_numerical_columnwise();
-  } else {
+  }
+  else
+  {
     // have to do row-wise if we want to use any available symbolic
     // derivatives
     return jacobian_partial(-1);
   }
 }
 
-const Covariances& Slam::covariances() {
+const Covariances& Slam::covariances()
+{
   return _covariances;
 }
 
-SparseSystem Slam::jacobian_partial(int last_n) {
+SparseSystem Slam::jacobian_partial(int last_n)
+{
   update_starts();
   // actual assembly of Jacobian
   int num_rows = _dim_measure;
-  if (last_n > 0) {
+  if (last_n > 0)
+  {
     num_rows = _num_new_rows;
   }
   DeleteOnReturn rows_ptr(new SparseVector*[num_rows]);
-  SparseVector** rows = rows_ptr._ptr; //[num_rows];
+  SparseVector** rows = rows_ptr._ptr;  //[num_rows];
 
   VectorXd rhs(num_rows);
   int row = 0;
   const list<Factor*>& factors = get_factors();
   list<Factor*>::const_iterator it = factors.begin();
-  if (last_n != -1) {
+  if (last_n != -1)
+  {
     // skip all entries except for last_n
-    for (int n = num_factors(); n>last_n; n--, it++);
+    for (int n = num_factors(); n > last_n; n--, it++)
+      ;
   }
-  for (; it!=factors.end(); it++) {
+  for (; it != factors.end(); it++)
+  {
     Factor* factor = *it;
     Jacobian jac = factor->jacobian_internal(_prop.force_numerical_jacobian);
     VectorXd jac_rhs = jac.rhs();
-    for (int r=0; r<jac_rhs.rows(); r++) {
-      rhs(row+r) = jac_rhs(r);
+    for (int r = 0; r < jac_rhs.rows(); r++)
+    {
+      rhs(row + r) = jac_rhs(r);
       // do not delete, will be pulled into SparseSystem below
-      rows[row+r] = new SparseVector(jac.dimtotal());
+      rows[row + r] = new SparseVector(jac.dimtotal());
     }
-    for (Terms::const_iterator it=jac.terms().begin(); it!=jac.terms().end(); it++) {
+    for (Terms::const_iterator it = jac.terms().begin();
+         it != jac.terms().end(); it++)
+    {
       int offset = it->node()->_start;
       int nr = it->term().rows();
-      for (int r=0; r<nr; r++) { // 0-entries not omitted
-        rows[row+r]->set(offset, it->term().row(r));
+      for (int r = 0; r < nr; r++)
+      {  // 0-entries not omitted
+        rows[row + r]->set(offset, it->term().row(r));
       }
     }
     row += factor->dim();
@@ -431,12 +500,13 @@ SparseSystem Slam::jacobian_partial(int last_n) {
   return SparseSystem(num_rows, _dim_nodes, rows, rhs);
 }
 
-void Slam::print_stats() {
+void Slam::print_stats()
+{
   double nnz = _R.nnz();
   double max_per_col = _R.max_nz();
   double dim = _dim_nodes;
-  double per_col = nnz/dim;
-  double fill_in = nnz/(dim*dim);
+  double per_col = nnz / dim;
+  double fill_in = nnz / (dim * dim);
   cout << "iSAM statistics:" << endl;
   cout << "  Normalized chi-square value: " << normalized_chi2() << endl;
   cout << "  Weighted sum of squared errors: " << chi2() << endl;
@@ -450,4 +520,4 @@ void Slam::print_stats() {
   cout << "    fill in: " << fill_in << "%" << endl;
 }
 
-}
+}  // namespace isam

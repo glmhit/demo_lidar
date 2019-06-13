@@ -27,17 +27,22 @@
 
 #pragma once
 
-namespace isam {
-
-enum Method {GAUSS_NEWTON, LEVENBERG_MARQUARDT, DOG_LEG};
+namespace isam
+{
+enum Method
+{
+  GAUSS_NEWTON,
+  LEVENBERG_MARQUARDT,
+  DOG_LEG
+};
 
 /**
  * User changeable default parameters.
  */
-class Properties {
+class Properties
+{
   // default copy constructor and assignment operator in use
 public:
-
   /** print additional information if true */
   bool verbose;
 
@@ -77,36 +82,45 @@ public:
 
   /** Only update R matrix/solution/batch every mod_update steps */
   int mod_update;
-  /** Batch solve with variable reordering and relinearization every mod_batch steps */
+  /** Batch solve with variable reordering and relinearization every mod_batch
+   * steps */
   int mod_batch;
   /** For incremental steps, solve by backsubstitution every mod_solve steps */
   int mod_solve;
 
   // default parameters
-  Properties() :
-    verbose(false),
-    quiet(false),
+  Properties()
+    : verbose(false)
+    , quiet(false)
+    ,
 
-    force_numerical_jacobian(false),
+    force_numerical_jacobian(false)
+    ,
 
-    method(GAUSS_NEWTON),
+    method(GAUSS_NEWTON)
+    ,
 
-    epsilon1(1e-2),
-    epsilon2(1e-2),
-    epsilon3(1e-2),
+    epsilon1(1e-2)
+    , epsilon2(1e-2)
+    , epsilon3(1e-2)
+    ,
 
-    epsilon_abs(1e-3),
-    epsilon_rel(1e-5),
+    epsilon_abs(1e-3)
+    , epsilon_rel(1e-5)
+    ,
 
-    max_iterations(500),
+    max_iterations(500)
+    ,
 
-    lm_lambda0(1e-6),
-    lm_lambda_factor(10.),
+    lm_lambda0(1e-6)
+    , lm_lambda_factor(10.)
+    ,
 
-    mod_update(1),
-    mod_batch(100),
-    mod_solve(1)
-  {}
+    mod_update(1)
+    , mod_batch(100)
+    , mod_solve(1)
+  {
+  }
 };
 
-}
+}  // namespace isam

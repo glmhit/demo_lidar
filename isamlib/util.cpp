@@ -28,17 +28,19 @@
 #include <map>
 #include <sys/time.h>
 #include <cmath>
-#include <algorithm> // abs
+#include <algorithm>  // abs
 
 #include "isam/util.h"
 
 using namespace std;
 
-namespace isam {
-
+namespace isam
+{
 // simple class for accumulating execution timing information by name
-class Timing {
-  class Stats {
+class Timing
+{
+  class Stats
+  {
   public:
     double t0;
     double t;
@@ -47,83 +49,105 @@ class Timing {
     int n;
   };
   map<string, Stats> stats;
+
 public:
-  void add_t0(string id, double t0) {
+  void add_t0(string id, double t0)
+  {
     stats[id].t0 = t0;
   }
-  double get_t0(string id) {
+  double get_t0(string id)
+  {
     return stats[id].t0;
   }
-  void add_dt(string id, double dt) {
+  void add_dt(string id, double dt)
+  {
     Stats& s = stats[id];
     s.t += dt;
     s.n++;
-    if (s.n==1 || s.t_max < dt) s.t_max = dt;
-    if (s.n==1 || s.t_min > dt) s.t_min = dt;
+    if (s.n == 1 || s.t_max < dt)
+      s.t_max = dt;
+    if (s.n == 1 || s.t_min > dt)
+      s.t_min = dt;
   }
-  void print() {
+  void print()
+  {
     map<string, Stats>::iterator it;
-    for(it = stats.begin(); it!=stats.end(); it++) {
+    for (it = stats.begin(); it != stats.end(); it++)
+    {
       Stats& s = it->second;
-      printf("%s: %g (%i times, min: %g, max: %g)\n",
-             it->first.c_str(), s.t, s.n, s.t_min, s.t_max);
+      printf("%s: %g (%i times, min: %g, max: %g)\n", it->first.c_str(), s.t,
+             s.n, s.t_min, s.t_max);
     }
   }
-  double time(string id) {
+  double time(string id)
+  {
     Stats& s = stats[id];
     return s.t;
   }
 };
 Timing timing;
 
-double tic() {
+double tic()
+{
   struct timeval t;
   gettimeofday(&t, NULL);
-  return ((double)t.tv_sec + ((double)t.tv_usec)/1000000.);
+  return ((double)t.tv_sec + ((double)t.tv_usec) / 1000000.);
 }
 
-double tic(string id) {
+double tic(string id)
+{
   double t0 = tic();
   timing.add_t0(id, t0);
   return t0;
 }
 
-double toc(double t) {
+double toc(double t)
+{
   double s = tic();
-  return (max(0., s-t));
+  return (max(0., s - t));
 }
 
-double toc(string id) {
+double toc(string id)
+{
   double dt = toc(timing.get_t0(id));
   timing.add_dt(id, dt);
   return dt;
 }
 
-void tictoc_print() {
+void tictoc_print()
+{
   timing.print();
 }
 
-double tictoc(string id) {
+double tictoc(string id)
+{
   return (timing.time(id));
 }
 
-Eigen::MatrixXd eye(int num) {
+Eigen::MatrixXd eye(int num)
+{
   return Eigen::MatrixXd::Identity(num, num);
 }
 
-void givens(const double a, const double b, double& c, double& s) {
-  if (b==0) {
+void givens(const double a, const double b, double& c, double& s)
+{
+  if (b == 0)
+  {
     c = 1.0;
     s = 0.0;
-  } else if (fabs(b)>fabs(a)) {
-    double t = -a/b;
-    s = 1/sqrt(1+t*t);
-    c = t*s;
-  } else {
-    double t = -b/a;
-    c = 1/sqrt(1+t*t);
-    s = t*c;
+  }
+  else if (fabs(b) > fabs(a))
+  {
+    double t = -a / b;
+    s = 1 / sqrt(1 + t * t);
+    c = t * s;
+  }
+  else
+  {
+    double t = -b / a;
+    c = 1 / sqrt(1 + t * t);
+    s = t * c;
   }
 }
 
-}
+}  // namespace isam

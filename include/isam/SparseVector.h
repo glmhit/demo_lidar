@@ -31,23 +31,24 @@
 
 #include "isam/util.h"
 
-namespace isam {
-
-class SparseVector {
+namespace isam
+{
+class SparseVector
+{
   int _nnz;
   int _nnz_max;
   int* _indices;
   double* _values;
 
   /**
-  * Copy data from one sparse vector to a new one - private
-  * @param vec Existing sparse vector to copy from.
-  */
+   * Copy data from one sparse vector to a new one - private
+   * @param vec Existing sparse vector to copy from.
+   */
   void _copy_from(const SparseVector& vec);
 
   /**
-  * Deallocate memory - private.
-  */
+   * Deallocate memory - private.
+   */
   void _dealloc();
 
   /**
@@ -68,11 +69,12 @@ public:
    */
   SparseVector();
 
-  SparseVector(int nnz_max) : _nnz(0), _nnz_max(nnz_max) {
+  SparseVector(int nnz_max) : _nnz(0), _nnz_max(nnz_max)
+  {
     _indices = new int[_nnz_max];
     _values = new double[_nnz_max];
   }
-  
+
   /**
    * Copy constructor - note that overwriting operator= is also necessary!
    * @param vec SparseVector to initialize from.
@@ -105,7 +107,7 @@ public:
    * @param vec Right-hand-side vector in assignment
    * @return self.
    */
-  const SparseVector& operator= (const SparseVector& vec);
+  const SparseVector& operator=(const SparseVector& vec);
 
   /**
    * Access value of an entry.
@@ -127,12 +129,16 @@ public:
    * @param idx Index of entry to add, has to be greater than last_idx().
    * @param val Value of new entry.
    */
-  inline void append(int idx, const double val = 0.) {
-    requireDebug(_nnz==0 || _indices[_nnz-1] < idx, "SparseVector::append: index has to be after last entry");
+  inline void append(int idx, const double val = 0.)
+  {
+    requireDebug(_nnz == 0 || _indices[_nnz - 1] < idx, "SparseVector::append: "
+                                                        "index has to be after "
+                                                        "last entry");
 
-    if (_nnz+1 > _nnz_max) {
+    if (_nnz + 1 > _nnz_max)
+    {
       // automatic resizing, amortized cost O(1)
-      int new_nnz_max = _nnz_max*2;
+      int new_nnz_max = _nnz_max * 2;
       _resize(new_nnz_max);
     }
     // insert new entry
@@ -148,8 +154,7 @@ public:
    * @return True if new entry had to be created (needed to update row index)
    */
   bool set(int idx, const double val = 0.);
-  
-  
+
   /**
    * Assign a value to a specific entry.
    * @param idx Index of entry to assign to.
@@ -189,28 +194,34 @@ public:
    */
   void print() const;
 
-  inline int nnz() const {
+  inline int nnz() const
+  {
     return _nnz;
   }
 
   friend class SparseVectorIter;
 };
 
-class SparseVectorIter {
+class SparseVectorIter
+{
   const SparseVector& s;
   int index;
+
 public:
   /**
    * Iterator for SparseVector.
    * @param sv SparseVector.
    */
-  inline SparseVectorIter(const SparseVector& sv) : s(sv), index(0) {}
+  inline SparseVectorIter(const SparseVector& sv) : s(sv), index(0)
+  {
+  }
 
   /**
    * Check if current element valid, ie. if we have not reached the end yet.
    * @return True if we still have a valid entry.
    */
-  inline bool valid() const {
+  inline bool valid() const
+  {
     return (index < s._nnz);
   }
 
@@ -218,8 +229,10 @@ public:
    * Get current element index.
    * @return Current element index.
    */
-  inline int get() const {
-    requireDebug(index < s._nnz, "SparseVectorIter::get(): Index out of range.");
+  inline int get() const
+  {
+    requireDebug(index < s._nnz, "SparseVectorIter::get(): Index out of "
+                                 "range.");
     int tmp = s._indices[index];
     return tmp;
   }
@@ -229,8 +242,10 @@ public:
    * @param val Current element value returned.
    * @return Current element index.
    */
-  inline int get(double& val) const {
-    requireDebug(index < s._nnz, "SparseVectorIter::get(): Index out of range.");
+  inline int get(double& val) const
+  {
+    requireDebug(index < s._nnz, "SparseVectorIter::get(): Index out of "
+                                 "range.");
     val = s._values[index];
     return s._indices[index];
   }
@@ -239,20 +254,23 @@ public:
    * Get current element value.
    * @return Current element value returned.
    */
-  inline double get_val() const {
-    requireDebug(index < s._nnz, "SparseVectorIter::get_val(): Index out of range.");
+  inline double get_val() const
+  {
+    requireDebug(index < s._nnz, "SparseVectorIter::get_val(): Index out of "
+                                 "range.");
     return s._values[index];
   }
 
   /**
    * Go to next element.
    */
-  inline void next() {
-    if (index < s._nnz) {
+  inline void next()
+  {
+    if (index < s._nnz)
+    {
       index++;
     }
   }
 };
 
-}
-
+}  // namespace isam

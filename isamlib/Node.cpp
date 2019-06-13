@@ -31,14 +31,20 @@
 
 namespace isam
 {
-void Node::mark_deleted() {
+void Node::mark_deleted()
+{
   _deleted = true;
-  for (std::list<Factor*>::iterator factor = _factors.begin(); factor != _factors.end(); ++factor)
+  for (std::list<Factor*>::iterator factor = _factors.begin();
+       factor != _factors.end(); ++factor)
     (*factor)->mark_deleted();
 }
-void Node::erase_marked_factors() {
-  for (std::list<Factor*>::iterator factor = _factors.begin(); factor != _factors.end();)
-    if ((*factor)->deleted()) factor = _factors.erase(factor);
-    else ++factor;
+void Node::erase_marked_factors()
+{
+  for (std::list<Factor*>::iterator factor = _factors.begin();
+       factor != _factors.end();)
+    if ((*factor)->deleted())
+      factor = _factors.erase(factor);
+    else
+      ++factor;
 }
-} // namespace - isam
+}  // namespace isam

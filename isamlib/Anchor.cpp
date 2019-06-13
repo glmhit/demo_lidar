@@ -32,27 +32,32 @@
 
 namespace isam
 {
-
-Anchor2d_Node::Anchor2d_Node(Slam* slam) : Pose2d_Node("Anchor2d"), _parent(NULL), _prior(NULL), _slam(slam)
+Anchor2d_Node::Anchor2d_Node(Slam* slam)
+  : Pose2d_Node("Anchor2d"), _parent(NULL), _prior(NULL), _slam(slam)
 {
 }
 
-Anchor2d_Node::~Anchor2d_Node() {
-  if (_prior) {
+Anchor2d_Node::~Anchor2d_Node()
+{
+  if (_prior)
+  {
     _slam->remove_factor(_prior);
     delete _prior;
   }
 }
 
-void Anchor2d_Node::set_prior() {
+void Anchor2d_Node::set_prior()
+{
   Noise noise = SqrtInformation(10000. * eye(3));
   Pose2d prior_origin(0., 0., 0.);
   _prior = new Pose2d_Factor(this, prior_origin, noise);
   _slam->add_factor(_prior);
 }
 
-void Anchor2d_Node::add_anchor(Anchor2d_Node* a) {
-  if (a->_prior) {
+void Anchor2d_Node::add_anchor(Anchor2d_Node* a)
+{
+  if (a->_prior)
+  {
     _slam->remove_factor(a->_prior);
     delete a->_prior;
     a->_prior = NULL;
@@ -61,12 +66,18 @@ void Anchor2d_Node::add_anchor(Anchor2d_Node* a) {
   _childs.push_back(a);
 }
 
-void Anchor2d_Node::merge(Anchor2d_Node* a, Pose2d old_origin) {
-  if (_parent != NULL) {
+void Anchor2d_Node::merge(Anchor2d_Node* a, Pose2d old_origin)
+{
+  if (_parent != NULL)
+  {
     _parent->merge(a, old_origin);
-  } else if (a->_parent != NULL) {
+  }
+  else if (a->_parent != NULL)
+  {
     merge(a->parent(), old_origin);
-  } else {
+  }
+  else
+  {
     // this and a are root anchors.
 
     // Add a to the child list
@@ -75,9 +86,10 @@ void Anchor2d_Node::merge(Anchor2d_Node* a, Pose2d old_origin) {
     add_anchor(a);
 
     // Move the children of a to this
-    for (size_t i = 0; i < a->_childs.size(); i++) {
+    for (size_t i = 0; i < a->_childs.size(); i++)
+    {
       Anchor2d_Node* child = a->_childs[i];
-      
+
       old_anchor_pose = child->value();
       child->init(old_origin.oplus(old_anchor_pose));
       add_anchor(child);
@@ -86,26 +98,32 @@ void Anchor2d_Node::merge(Anchor2d_Node* a, Pose2d old_origin) {
   }
 }
 
-Anchor3d_Node::Anchor3d_Node(Slam* slam) : Pose3d_Node("Anchor3d"), _parent(NULL), _prior(NULL), _slam(slam)
+Anchor3d_Node::Anchor3d_Node(Slam* slam)
+  : Pose3d_Node("Anchor3d"), _parent(NULL), _prior(NULL), _slam(slam)
 {
 }
 
-Anchor3d_Node::~Anchor3d_Node() {
-  if (_prior) {
+Anchor3d_Node::~Anchor3d_Node()
+{
+  if (_prior)
+  {
     _slam->remove_factor(_prior);
     delete _prior;
   }
 }
 
-void Anchor3d_Node::set_prior() {
+void Anchor3d_Node::set_prior()
+{
   Noise noise = SqrtInformation(10000. * eye(6));
   Pose3d prior_origin;
   _prior = new Pose3d_Factor(this, prior_origin, noise);
   _slam->add_factor(_prior);
 }
 
-void Anchor3d_Node::add_anchor(Anchor3d_Node* a) {
-  if (a->_prior) {
+void Anchor3d_Node::add_anchor(Anchor3d_Node* a)
+{
+  if (a->_prior)
+  {
     _slam->remove_factor(a->_prior);
     delete a->_prior;
     a->_prior = NULL;
@@ -114,12 +132,18 @@ void Anchor3d_Node::add_anchor(Anchor3d_Node* a) {
   _childs.push_back(a);
 }
 
-void Anchor3d_Node::merge(Anchor3d_Node* a, Pose3d old_origin) {
-  if (_parent != NULL) {
+void Anchor3d_Node::merge(Anchor3d_Node* a, Pose3d old_origin)
+{
+  if (_parent != NULL)
+  {
     _parent->merge(a, old_origin);
-  } else if (a->_parent != NULL) {
+  }
+  else if (a->_parent != NULL)
+  {
     merge(a->parent(), old_origin);
-  } else {
+  }
+  else
+  {
     // this and a are root anchors.
 
     // Add a to the child list
@@ -128,7 +152,8 @@ void Anchor3d_Node::merge(Anchor3d_Node* a, Pose3d old_origin) {
     add_anchor(a);
 
     // Move the children of a to this
-    for (size_t i = 0; i < a->_childs.size(); i++) {
+    for (size_t i = 0; i < a->_childs.size(); i++)
+    {
       Anchor3d_Node* child = a->_childs[i];
 
       old_anchor_pose = child->value();
@@ -139,4 +164,4 @@ void Anchor3d_Node::merge(Anchor3d_Node* a, Pose3d old_origin) {
   }
 }
 
-}
+}  // namespace isam
